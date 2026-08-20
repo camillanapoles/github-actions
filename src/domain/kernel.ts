@@ -23,7 +23,7 @@ import type {
   StoredObjectRecord,
 } from "./types";
 import { runHarness } from "@/harness/runner";
-import { seedIfEmpty } from "@/db/seed";
+import { ensureArenaSessionRule, seedIfEmpty } from "@/db/seed";
 
 /**
  * Kernel — unique space of what is currently in GitHub Actions runtime.
@@ -40,6 +40,7 @@ import { seedIfEmpty } from "@/db/seed";
 export class Kernel {
   private ensureSeeded() {
     seedIfEmpty();
+    ensureArenaSessionRule();
   }
 
   stats() {

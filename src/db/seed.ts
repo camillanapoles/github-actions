@@ -61,6 +61,7 @@ export function seed() {
     priority: 50,
     enabled: true,
   });
+  ensureArenaSessionRule();
 
   agents.upsert({
     id: "harness",
@@ -221,6 +222,33 @@ export function seed() {
     result: { seeded: true },
     createdAt: ts,
     finishedAt: ts,
+  });
+}
+
+export function ensureArenaSessionRule() {
+  rules.upsert({
+    id: "arena-session",
+    name: "arena-agent: não merge enquanto itera",
+    matchPattern: "/runtime/**",
+    op: "exec",
+    effect: "allow",
+    transform: null,
+    priority: 100,
+    enabled: true,
+  });
+  objects.upsert({
+    id: "arena-session",
+    kind: "rule-doc",
+    path: "/objects/rule-doc/arena-session",
+    pattern: PATTERNS.object,
+    payload: {
+      tag: "arena-agent",
+      auto: "commit+push only arena/<session>",
+      endWhen: ["merge", "fim", "fechar", "encerrar"],
+      nonCommit: "PR comment + UI banner + Action summary",
+      doNot: "apagar o ramo arena/… nem trabalhar noutro branch",
+    },
+    metadata: { tag: "arena-agent", system: true },
   });
 }
 

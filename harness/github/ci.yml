@@ -20,3 +20,21 @@ jobs:
         run: |
           npm run seed
           npx tsx src/cli/agent.ts --goal "smoke: resolver execução e cachear"
+
+  arena-session-notice:
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'arena/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Inject best practice (non-commit return)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: npx --yes tsx src/cli/inject-session-notice.ts

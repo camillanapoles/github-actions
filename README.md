@@ -55,7 +55,19 @@ Workflows (fonte em `harness/github/` — copiar para `.github/workflows/` no re
 - `agent-harness.yml` — o agente **é** a Action
 - `runtime-persist.yml` — unmount → objeto
 - `cache-executions.yml` — tece o cache
-- `ci.yml` — typecheck + smoke do CLI
+- `ci.yml` — typecheck + smoke do CLI + injeção `arena-agent`
+- `arena-session.yml` — retorno non-commit (comentário PR + label + summary)
+
+## Sessão Arena `[arena-agent]` (não confundas)
+
+Isto **não vive só no commit**. A UI, o comentário do PR e o summary da Action dizem o mesmo:
+
+1. **Não faças merge** enquanto quiseres continuar. Deixa o PR aberto.
+2. O agente faz **commit e push só** para `arena/<sessao>`.
+3. O PR atualiza sozinho.
+4. **Fim** só se disseres claramente: `merge`, `fim`, `fechar`.
+
+Merge **não** apaga a sessão. Apagar o ramo `arena/…` é que a perde. Ver `harness/rules/arena-session.md`.
 
 ## Correr local
 

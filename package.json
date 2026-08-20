@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 3000",
     "seed": "npx tsx src/db/seed.ts",
-    "agent": "npx tsx src/cli/agent.ts"
+    "agent": "npx tsx src/cli/agent.ts",
+    "session-notice": "npx tsx src/cli/inject-session-notice.ts"
   },
   "dependencies": {
     "next": "^15.1.7",

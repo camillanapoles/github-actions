@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SessionNotice } from "@/components/SessionNotice";
 
 const NAV = [
   { href: "/", label: "Kernel", k: "01" },
@@ -50,7 +51,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </nav>
       </header>
       <main className="relative md:pl-56">
-        <div className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">{children}</div>
+        <div className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
+          <SessionNotice />
+          {children}
+        </div>
       </main>
     </div>
   );
