@@ -1,0 +1,86 @@
+# Agentic AI harness — o próprio agente É uma GitHub Action.
+# Tudo é backend: o workflow é o programa, o runner é o CPU,
+# artifacts + cache são o disco, o kernel ACTOS persiste objetos
+# em paths (pattern + id) e aplica regras.
+
+name: agent-harness
+
+on:
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: Objetivo do agente
+        required: true
+        type: string
+      agent_id:
+        description: Agente (harness | cache-weaver)
+        required: false
+        default: harness
+        type: string
+  repository_dispatch:
+    types: [agent.run]
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    env:
+      GOAL: ${{ github.event.inputs.goal || github.event.client_payload.goal || github.event.issue.title || 'Indexar runtime e persistir objetos' }}
+      AGENT_ID: ${{ github.event.inputs.agent_id || github.event.client_payload.agent_id || 'harness' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Restore object store (disco analog)
+        uses: actions/cache@v4
+        with:
+          path: data/objects
+          key: actos-objects-${{ github.sha }}
+          restore-keys: |
+            actos-objects-
+
+      - name: Enter unique runtime space
+        run: echo "RUN_PATH=/runtime/runs/${GITHUB_RUN_ID}" >> "$GITHUB_ENV"
+
+      - name: Agent loop (workflow-backed)
+        run: npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
+
+      - name: Persist objects at pattern+id
+        run: |
+          mkdir -p "data/objects/runtime/runs/${GITHUB_RUN_ID}"
+          node -e '
+            const fs = require("fs");
+            const id = process.env.GITHUB_RUN_ID;
+            const obj = {
+              pattern: "/runtime/runs/{id}",
+              id,
+              path: "/runtime/runs/" + id,
+              sha: process.env.GITHUB_SHA,
+              goal: process.env.GOAL,
+            };
+            fs.writeFileSync("data/objects/runtime/runs/" + id + "/meta.json", JSON.stringify(obj, null, 2));
+          '
+
+      - name: Upload resolved objects (filesystem analog)
+        uses: actions/upload-artifact@v4
+        with:
+          name: objects-${{ github.run_id }}
+          path: data/objects/
+          if-no-files-found: warn
+
+      - name: Cache store
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: data/objects
+          key: actos-objects-${{ github.sha }}-${{ github.run_id }}

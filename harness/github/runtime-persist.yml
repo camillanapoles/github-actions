@@ -1,0 +1,49 @@
+# Depois que uma Action sai do espaço único (runtime),
+# o resultado resolvido vira objeto e é armazenado em
+# /objects/{kind}/{id} e /cache/{workflow}/{sha}/{id}.
+
+name: runtime-persist
+
+on:
+  workflow_run:
+    workflows: ["agent-harness", "ci"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: GitHub run id a resolver
+        required: false
+        type: string
+
+jobs:
+  persist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Resolve → object → path
+        env:
+          SOURCE_RUN: ${{ github.event.workflow_run.id || github.event.inputs.run_id || github.run_id }}
+        run: |
+          mkdir -p "data/objects/objects/execution" "data/objects/cache"
+          node --experimental-sqlite -e "
+            const fs = require('fs');
+            const id = process.env.SOURCE_RUN;
+            const obj = {
+              pattern: '/objects/{kind}/{id}',
+              kind: 'execution',
+              id,
+              path: '/objects/execution/' + id,
+              payload: { source: 'runtime-persist', run: id, sha: process.env.GITHUB_SHA },
+            };
+            fs.writeFileSync('data/objects/objects/execution/' + id + '.json', JSON.stringify(obj, null, 2));
+            console.log('resolved', obj.path);
+          "
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resolved-${{ github.run_id }}
+          path: data/objects/

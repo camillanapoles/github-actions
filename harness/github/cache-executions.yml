@@ -1,0 +1,32 @@
+# Materializa o resultado de execuções cacheadas.
+# A page async do ACTOS lê estes objetos da base.
+
+name: cache-executions
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+jobs:
+  weave:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: data/objects
+          key: actos-objects-${{ github.sha }}
+          restore-keys: actos-objects-
+      - name: Weaver agent
+        run: npx tsx src/cli/agent.ts --agent cache-weaver --goal "Tece execuções cacheadas em objetos /cache/{workflow}/{sha}/{id}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cache-weave-${{ github.run_id }}
+          path: data/objects/
