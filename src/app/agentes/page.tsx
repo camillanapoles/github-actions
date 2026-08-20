@@ -11,7 +11,7 @@ export default async function AgentesPage() {
 
   return (
     <div>
-      <Title sub="IA agentic harness que usa workflow. O agente não corre no browser: é GitHub Action (.github/workflows/agent-harness.yml) e, localmente, o mesmo CLI (src/cli/agent.ts). Cada step é objeto em /agents/{id}/runs/{runId}/steps/{n}.">
+      <Title sub="IA agentic harness que usa workflow. O agente não corre no browser: é GitHub Action (harness/github/agent-harness.yml) e, localmente, o mesmo CLI (src/cli/agent.ts). Cada step é objeto em /agents/{id}/runs/{runId}/steps/{n}.">
         Harness agentic
       </Title>
 
