@@ -1,44 +1,32 @@
 {
   "runtime": {
     "processes": 0,
-    "updatedAt": "2026-08-21T22:26:00.950Z"
+    "updatedAt": "2026-08-21T22:44:31.269Z"
   },
   "executions": {
     "byStatus": {
-      "cached": 12,
+      "cached": 11,
       "failed": 1
     },
     "cacheHits": 8,
-    "total": 13
+    "total": 12
   },
-  "objects": 52,
+  "objects": 26,
   "kinds": [
     {
-      "kind": "agent-step",
-      "count": 18
+      "kind": "execution",
+      "count": 12
     },
     {
       "kind": "cache",
-      "count": 14
-    },
-    {
-      "kind": "execution",
-      "count": 14
-    },
-    {
-      "kind": "agent-run",
-      "count": 2
-    },
-    {
-      "kind": "goal-result",
-      "count": 2
-    },
-    {
-      "kind": "manifest",
-      "count": 1
+      "count": 12
     },
     {
       "kind": "rule-doc",
+      "count": 1
+    },
+    {
+      "kind": "manifest",
       "count": 1
     }
   ],
@@ -46,12 +34,12 @@
   "rules": 6,
   "queue": 0,
   "gitfs": {
-    "head": "32339b355e12f1dbfc2ed3eafe5a17f310e50987",
+    "head": "62ad489a28832eb750c805d38d88c5e9a6baffa1",
     "files": 27,
     "runtimeRefs": [],
-    "workTree": "/home/user/github-actions/.actos-fs",
+    "workTree": "/home/runner/work/github-actions/github-actions/.actos-fs",
     "attached": true,
-    "remoteHead": "cfc7c496b9d233caaa187c2f19cdbd535f1f9f0e",
+    "remoteHead": "62ad489a28832eb750c805d38d88c5e9a6baffa1",
     "casTags": [
       "refs/tags/actos/obj/04b3c5e18726dd85ea305c7a38fc29b985b324d7414ddb74f6489b1f793d4b62",
       "refs/tags/actos/obj/19d520b2419f06febee152588f7f66750cf4d3680005833208d7ca701bdf97b5",
@@ -70,17 +58,19 @@
   },
   "cdn": {
     "l1": {
-      "entries": 14,
-      "bytes": 17449,
-      "hits": 14
+      "entries": 0,
+      "bytes": 0,
+      "hits": 0
     },
     "l2": {
-      "tickets": 1
+      "tickets": 0
     },
     "ttlMs": 604800000
   },
   "extra": {
-    "reason": "fs-sync --push"
+    "evicted": 0,
+    "promoted": 0,
+    "errors": []
   },
-  "at": "2026-08-21T22:26:01.254Z"
+  "at": "2026-08-21T22:44:31.694Z"
 }
