@@ -1,0 +1,14 @@
+{
+  "id": "arun_mt2cqkuwzfarvh",
+  "kind": "agent-run",
+  "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh",
+  "pattern": "/agents/{id}/runs/{runId}",
+  "payload": {
+    "goal": true,
+    "steps": 9,
+    "runId": "arun_mt2cqkuwzfarvh"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
