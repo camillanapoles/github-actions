@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3iqczwkr59e3_s6",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/6",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 6,
+    "name": "act/Escrever objetos (pattern + id)",
+    "uses": "kernel.write",
+    "status": "ok",
+    "input": {
+      "goal": "smoke cpu github",
+      "with": {}
+    },
+    "output": {
+      "path": "/objects/goal-result/goal_mt3iqd1kve8ou6",
+      "id": "goal_mt3iqd1kve8ou6"
+    },
+    "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/6",
+    "at": "2026-08-21T22:25:59.481Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
