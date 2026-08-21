@@ -7,6 +7,7 @@ import type {
   ExecutionRecord,
   ExecutionStatus,
   JobState,
+  JournalEvent,
   RuleRecord,
   RuntimeProcess,
   RuntimeSnapshot,
@@ -320,6 +321,13 @@ export class AgentRunRepo {
     return row ? this.map(row) : null;
   }
 
+  queued(limit = 16): AgentRunRecord[] {
+    const rows = db()
+      .prepare("SELECT * FROM agent_runs WHERE status = 'queued' ORDER BY created_at ASC LIMIT ?")
+      .all(limit) as Record<string, unknown>[];
+    return rows.map((r) => this.map(r));
+  }
+
   upsert(run: AgentRunRecord): AgentRunRecord {
     db()
       .prepare(
@@ -409,6 +417,38 @@ export class SyscallRepo {
   }
 }
 
+export class EventRepo {
+  append(op: string, path: string | null, payload: unknown): JournalEvent {
+    const row = db().prepare("SELECT COALESCE(MAX(seq), 0) as s FROM events").get() as { s: number };
+    const rec: JournalEvent = {
+      id: nid("ev"),
+      seq: Number(row.s) + 1,
+      op,
+      path,
+      payload,
+      at: nowIso(),
+    };
+    db()
+      .prepare("INSERT INTO events (id, seq, op, path, payload, at) VALUES (?, ?, ?, ?, ?, ?)")
+      .run(rec.id, rec.seq, rec.op, path, JSON.stringify(payload), rec.at);
+    return rec;
+  }
+
+  list(limit = 80): JournalEvent[] {
+    const rows = db()
+      .prepare("SELECT * FROM events ORDER BY seq DESC LIMIT ?")
+      .all(limit) as Record<string, unknown>[];
+    return rows.map((r) => ({
+      id: String(r.id),
+      seq: Number(r.seq),
+      op: String(r.op),
+      path: r.path ? String(r.path) : null,
+      payload: parse(String(r.payload), {}),
+      at: String(r.at),
+    }));
+  }
+}
+
 export const objects = new ObjectRepo();
 export const executions = new ExecutionRepo();
 export const rules = new RuleRepo();
@@ -416,3 +456,4 @@ export const agents = new AgentRepo();
 export const agentRuns = new AgentRunRepo();
 export const runtime = new RuntimeRepo();
 export const syscalls = new SyscallRepo();
+export const events = new EventRepo();

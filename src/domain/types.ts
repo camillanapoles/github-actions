@@ -5,7 +5,14 @@ export type ExecutionStatus =
   | "cached"
   | "failed";
 
-export type AgentStatus = "idle" | "planning" | "acting" | "persisting" | "done" | "failed";
+export type AgentStatus =
+  | "queued"
+  | "idle"
+  | "planning"
+  | "acting"
+  | "persisting"
+  | "done"
+  | "failed";
 
 export type RuleOp = "read" | "write" | "exec" | "*";
 export type RuleEffect = "allow" | "deny" | "transform";
@@ -102,12 +109,23 @@ export type AgentRunRecord = {
 export type RuntimeProcess = {
   pid: string;
   runId: string;
+  ppid?: string;
   workflow: string;
   kind: "action" | "agent";
   status: "running" | "sleeping" | "zombie";
   startedAt: string;
+  expiresAt?: string;
   path: string;
   memoryHint: string;
+};
+
+export type JournalEvent = {
+  id: string;
+  seq: number;
+  op: string;
+  path: string | null;
+  payload: unknown;
+  at: string;
 };
 
 export type RuntimeSnapshot = {

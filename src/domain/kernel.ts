@@ -1,15 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
-import { nid, nowIso } from "@/db/client";
+import { nid, nowIso, tx } from "@/db/client";
 import {
   agentRuns,
   agents,
+  events,
   executions,
   objects,
   rules,
-  runtime,
   syscalls,
 } from "@/db/repo";
+import { cacheKey as casKey } from "./cas";
 import { ObjectPath, PATTERNS } from "./path";
 import { RuleEngine } from "./rules";
 import type {
@@ -18,24 +19,31 @@ import type {
   AgentStep,
   ExecutionRecord,
   JobState,
-  RuleOp,
   RuntimeProcess,
   StoredObjectRecord,
 } from "./types";
 import { runHarness } from "@/harness/runner";
 import { ensureArenaSessionRule, seedIfEmpty } from "@/db/seed";
 
+const RUNTIME_TTL_MS = 30 * 60 * 1000;
+
+type LiveProc = RuntimeProcess & { expiresAtMs: number };
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __actosLive: Map<string, LiveProc> | undefined;
+}
+
+function liveMap(): Map<string, LiveProc> {
+  if (!globalThis.__actosLive) globalThis.__actosLive = new Map();
+  return globalThis.__actosLive;
+}
+
 /**
  * Kernel — unique space of what is currently in GitHub Actions runtime.
  *
- * Analogous to an OS:
- *   process table  → runtime processes (workflow runs)
- *   filesystem     → object store keyed by pattern + id
- *   permissions    → rules
- *   syscalls       → extra backend functions beyond CRUD
- *
- * Lifecycle of an execution:
- *   queued → in_runtime (unique space) → resolved (everything is object) → cached at path
+ * F1: CAS cache keys, append-only journal, in-memory runtime + TTL,
+ * HTTP enqueue / CLI execute.
  */
 export class Kernel {
   private ensureSeeded() {
@@ -43,21 +51,31 @@ export class Kernel {
     ensureArenaSessionRule();
   }
 
+  journal(op: string, pathName: string | null, payload: unknown) {
+    return events.append(op, pathName, payload);
+  }
+
+  listEvents(limit = 80) {
+    this.ensureSeeded();
+    return events.list(limit);
+  }
+
   stats() {
     this.ensureSeeded();
-    const snap = runtime.snapshot();
+    const procs = this.ps();
     const ex = executions.stats();
     const kinds = objects.kinds();
     return {
       runtime: {
-        processes: snap.processes.length,
-        updatedAt: snap.updatedAt,
+        processes: procs.length,
+        updatedAt: nowIso(),
       },
       executions: ex,
       objects: kinds.reduce((a, k) => a + k.count, 0),
       kinds,
       agents: agents.list().length,
       rules: rules.list().filter((r) => r.enabled).length,
+      queue: agentRuns.queued().length,
     };
   }
 
@@ -120,6 +138,7 @@ export class Kernel {
       metadata: { ...(input.metadata ?? {}), rule: decision.ruleId },
     });
     this.persistFile(obj);
+    this.journal("write", resolved, { kind: input.kind, id: obj.id });
     this.trace("write", { path: resolved, kind: input.kind }, { id: obj.id }, resolved);
     return obj;
   }
@@ -130,6 +149,7 @@ export class Kernel {
     const decision = new RuleEngine(rules.list()).evaluate("write", obj.path, obj);
     if (!decision.allowed) throw new Error(`EACCES: ${decision.reason}`);
     const ok = objects.delete(id);
+    this.journal("unlink", obj.path, { id });
     this.trace("unlink", { id }, { ok }, obj.path);
     return ok;
   }
@@ -138,7 +158,7 @@ export class Kernel {
     return ObjectPath.from(pattern, params).resolve();
   }
 
-  /* ---------- executions + cache ---------- */
+  /* ---------- executions + CAS cache ---------- */
 
   listCachedExecutions(workflow?: string): ExecutionRecord[] {
     this.ensureSeeded();
@@ -155,101 +175,109 @@ export class Kernel {
     return executions.get(id);
   }
 
-  /**
-   * After the run finishes, everything becomes an object and leaves the
-   * unique runtime space. Stored at /objects/execution/{id} and
-   * /cache/{workflow}/{sha}/{id}.
-   */
   resolveExecution(id: string): StoredObjectRecord {
     const ex = executions.get(id);
     if (!ex) throw new Error(`execução não encontrada: ${id}`);
 
-    const obj = this.write({
-      kind: "execution",
-      id: ex.id,
-      pattern: PATTERNS.object,
-      params: { kind: "execution", id: ex.id },
-      payload: ex,
-      metadata: { cacheKey: ex.cacheKey, runId: ex.runId },
-    });
+    return tx(() => {
+      const obj = this.write({
+        kind: "execution",
+        id: ex.id,
+        pattern: PATTERNS.object,
+        params: { kind: "execution", id: ex.id },
+        payload: ex,
+        metadata: { cacheKey: ex.cacheKey, runId: ex.runId },
+      });
 
-    const cachePath = ObjectPath.named("cache", {
-      workflow: ex.workflow,
-      sha: ex.sha,
-      id: ex.id,
-    }).resolve();
-
-    this.write({
-      kind: "cache",
-      id: `cache_${ex.id}`,
-      path: cachePath,
-      pattern: PATTERNS.cache,
-      payload: {
-        hit: true,
-        executionId: ex.id,
+      const cachePath = ObjectPath.named("cache", {
         workflow: ex.workflow,
         sha: ex.sha,
-        conclusion: ex.conclusion,
-        jobs: ex.jobs,
-      },
-      metadata: { source: "resolveExecution" },
-    });
+        id: ex.cacheKey.slice(0, 16),
+      }).resolve();
 
-    const next: ExecutionRecord = {
-      ...ex,
-      status: "cached",
-      objectId: obj.id,
-      finishedAt: ex.finishedAt ?? nowIso(),
-    };
-    executions.upsert(next);
-    this.unmountProcess(ex.runId);
-    this.trace("resolve", { executionId: id }, { objectId: obj.id, cachePath }, obj.path);
-    return obj;
+      this.write({
+        kind: "cache",
+        id: `cache_${ex.cacheKey.slice(0, 16)}`,
+        path: cachePath,
+        pattern: PATTERNS.cache,
+        payload: {
+          hit: true,
+          executionId: ex.id,
+          workflow: ex.workflow,
+          sha: ex.sha,
+          cacheKey: ex.cacheKey,
+          conclusion: ex.conclusion,
+          jobs: ex.jobs,
+        },
+        metadata: { source: "resolveExecution" },
+      });
+
+      executions.upsert({
+        ...ex,
+        status: "cached",
+        objectId: obj.id,
+        finishedAt: ex.finishedAt ?? nowIso(),
+      });
+      this.unmountProcess(ex.runId);
+      this.journal("resolve", obj.path, { executionId: id, cachePath, cacheKey: ex.cacheKey });
+      this.trace("resolve", { executionId: id }, { objectId: obj.id, cachePath }, obj.path);
+      return obj;
+    });
   }
 
-  cacheGet(cacheKey: string): ExecutionRecord | null {
-    const hit = executions.byCacheKey(cacheKey);
-    this.trace("cache.get", { cacheKey }, { hit: Boolean(hit) }, hit?.objectId ?? null);
+  cacheGet(key: string): ExecutionRecord | null {
+    const hit = executions.byCacheKey(key);
+    this.trace("cache.get", { cacheKey: key }, { hit: Boolean(hit) }, hit?.objectId ?? null);
     return hit;
   }
 
   cachePut(ex: ExecutionRecord): ExecutionRecord {
     const cached = { ...ex, status: "cached" as const };
     executions.upsert(cached);
+    this.journal("cache.put", null, { id: ex.id, cacheKey: ex.cacheKey });
     return cached;
   }
 
-  /* ---------- runtime (unique space) ---------- */
+  /* ---------- runtime (unique space, RAM analog) ---------- */
 
   ps(): RuntimeProcess[] {
     this.ensureSeeded();
-    return runtime.snapshot().processes;
+    this.reap();
+    return [...liveMap().values()].map(stripLive);
   }
 
-  mountProcess(proc: RuntimeProcess): RuntimeProcess[] {
-    const snap = runtime.snapshot();
-    const next = [...snap.processes.filter((p) => p.pid !== proc.pid), proc];
-    runtime.save(next);
-    return next;
+  mountProcess(proc: RuntimeProcess, ttlMs = RUNTIME_TTL_MS): RuntimeProcess[] {
+    const expiresAtMs = Date.now() + ttlMs;
+    liveMap().set(proc.pid, {
+      ...proc,
+      expiresAt: new Date(expiresAtMs).toISOString(),
+      expiresAtMs,
+    });
+    this.journal("mount", proc.path, { pid: proc.pid, ttlMs });
+    return this.ps();
   }
 
   unmountProcess(runId: string): RuntimeProcess[] {
-    const snap = runtime.snapshot();
-    const next = snap.processes.filter((p) => p.runId !== runId && p.pid !== runId);
-    runtime.save(next);
-    return next;
+    const map = liveMap();
+    for (const [pid, p] of map) {
+      if (p.runId === runId || p.pid === runId) map.delete(pid);
+    }
+    this.journal("unmount", `/runtime/runs/${runId}`, { runId });
+    return this.ps();
   }
 
   fork(runId: string): RuntimeProcess {
     const src = this.ps().find((p) => p.runId === runId || p.pid === runId);
     if (!src) throw new Error("processo não está no espaço único");
+    const pid = nid("pid");
     const child: RuntimeProcess = {
       ...src,
-      pid: nid("pid"),
-      runId: nid("run"),
+      pid,
+      runId: pid,
+      ppid: src.pid,
       startedAt: nowIso(),
-      path: ObjectPath.named("runtimeRun", { id: nid("run") }).resolve(),
-      memoryHint: "fork",
+      path: ObjectPath.named("runtimeRun", { id: pid }).resolve(),
+      memoryHint: `fork of ${src.pid}`,
     };
     this.mountProcess(child);
     this.trace("fork", { from: runId }, child, child.path);
@@ -257,15 +285,26 @@ export class Kernel {
   }
 
   snapshotRuntime() {
-    const snap = runtime.snapshot();
+    const processes = this.ps();
     return this.write({
       kind: "snapshot",
-      payload: snap,
-      metadata: { n: snap.processes.length },
+      payload: { processes, at: nowIso() },
+      metadata: { n: processes.length },
     });
   }
 
-  /* ---------- agentic harness ---------- */
+  private reap() {
+    const now = Date.now();
+    const map = liveMap();
+    for (const [pid, p] of map) {
+      if (p.expiresAtMs <= now) {
+        map.delete(pid);
+        this.journal("reap", p.path, { pid, reason: "ttl" });
+      }
+    }
+  }
+
+  /* ---------- agentic harness: enqueue (API) / execute (CPU) ---------- */
 
   listAgents(): AgentRecord[] {
     this.ensureSeeded();
@@ -282,17 +321,124 @@ export class Kernel {
     return agentRuns.list(agentId);
   }
 
-  async runAgent(goal: string, agentId = "harness"): Promise<AgentRunRecord> {
+  listQueue(): AgentRunRecord[] {
+    this.ensureSeeded();
+    return agentRuns.queued();
+  }
+
+  /** HTTP / UI: só enfileira. O CPU é o CLI ou a Action. */
+  enqueueAgent(goal: string, agentId = "harness"): AgentRunRecord {
     this.ensureSeeded();
     const agent = agents.get(agentId) ?? agents.list()[0];
     if (!agent) throw new Error("nenhum agente no kernel");
 
+    const key = casKey({ workflow: agent.workflow, goal, extra: { agent: agent.id } });
     const runId = nid("arun");
     const execId = nid("ex");
-    const sha = fakeSha();
-    const cacheKey = `actos-${agent.workflow}-${sha}-${hashGoal(goal)}`;
+    const sha = key.slice(0, 40);
+    const hit = this.cacheGet(key);
 
-    const cached = this.cacheGet(cacheKey);
+    const execution: ExecutionRecord = {
+      id: execId,
+      runId,
+      workflow: "agent-harness.yml",
+      event: "queue",
+      status: hit ? "cached" : "queued",
+      conclusion: hit ? hit.conclusion : null,
+      sha,
+      branch: "arena/01a01e33-github-actions",
+      actor: "actos-kernel",
+      cacheKey: key,
+      cacheHit: Boolean(hit),
+      startedAt: null,
+      finishedAt: hit ? nowIso() : null,
+      jobs: [],
+      logs: hit ? "CAS hit on enqueue\n" : "queued — waiting for CPU (CLI/Action)\n",
+      objectId: hit?.objectId ?? null,
+      createdAt: nowIso(),
+    };
+    executions.upsert(execution);
+
+    const run: AgentRunRecord = {
+      id: runId,
+      agentId: agent.id,
+      goal,
+      status: hit ? "done" : "queued",
+      executionId: execId,
+      steps: hit
+        ? [
+            {
+              n: 0,
+              name: "cas-hit",
+              uses: "kernel.cache.get",
+              status: "ok",
+              input: { cacheKey: key },
+              output: { executionId: hit.id },
+              path: ObjectPath.named("agentStep", { id: agent.id, runId, n: "0" }).resolve(),
+              at: nowIso(),
+            },
+          ]
+        : [],
+      result: hit ? { cacheHit: true, executionId: hit.id, cacheKey: key } : { queued: true, cacheKey: key },
+      createdAt: nowIso(),
+      finishedAt: hit ? nowIso() : null,
+    };
+    agentRuns.upsert(run);
+    this.journal("enqueue", `/agents/${agent.id}/runs/${runId}`, {
+      goal,
+      cacheKey: key,
+      cacheHit: Boolean(hit),
+    });
+    return run;
+  }
+
+  async drain(limit = 8): Promise<AgentRunRecord[]> {
+    this.ensureSeeded();
+    const batch = agentRuns.queued(limit);
+    const out: AgentRunRecord[] = [];
+    for (const run of batch) {
+      out.push(await this.execute(run.id));
+    }
+    this.journal("drain", null, { n: out.length });
+    return out;
+  }
+
+  /** CPU: o que a Action / CLI corre. */
+  async execute(runId: string): Promise<AgentRunRecord> {
+    this.ensureSeeded();
+    const run = agentRuns.get(runId);
+    if (!run) throw new Error(`run não encontrada: ${runId}`);
+    if (run.status === "done") return run;
+    const agent = agents.get(run.agentId);
+    if (!agent) throw new Error("agente em falta");
+    const execution = run.executionId ? executions.get(run.executionId) : null;
+    if (!execution) throw new Error("execução em falta");
+
+    const hit = this.cacheGet(execution.cacheKey);
+    if (hit) {
+      const done: AgentRunRecord = {
+        ...run,
+        status: "done",
+        steps: [
+          {
+            n: 0,
+            name: "cas-hit",
+            uses: "kernel.cache.get",
+            status: "ok",
+            input: { cacheKey: execution.cacheKey },
+            output: { executionId: hit.id },
+            path: ObjectPath.named("agentStep", { id: agent.id, runId, n: "0" }).resolve(),
+            at: nowIso(),
+          },
+        ],
+        result: { cacheHit: true, executionId: hit.id, cacheKey: execution.cacheKey },
+        finishedAt: nowIso(),
+      };
+      agentRuns.upsert(done);
+      executions.upsert({ ...execution, status: "cached", cacheHit: true, finishedAt: nowIso() });
+      return done;
+    }
+
     const jobs: JobState[] = [
       {
         id: "harness",
@@ -302,27 +448,13 @@ export class Kernel {
         steps: [],
       },
     ];
-
-    const execution: ExecutionRecord = {
-      id: execId,
-      runId,
-      workflow: "agent-harness.yml",
-      event: "workflow_dispatch",
-      status: cached ? "cached" : "in_runtime",
-      conclusion: cached ? cached.conclusion : null,
-      sha,
-      branch: "arena/01a01e33-github-actions",
-      actor: "actos-kernel",
-      cacheKey,
-      cacheHit: Boolean(cached),
+    executions.upsert({
+      ...execution,
+      status: "in_runtime",
       startedAt: nowIso(),
-      finishedAt: cached ? nowIso() : null,
       jobs,
-      logs: cached ? "cache hit — reusing object\n" : "entering unique runtime space\n",
-      objectId: cached?.objectId ?? null,
-      createdAt: nowIso(),
-    };
-    executions.upsert(execution);
+      logs: execution.logs + "entering unique runtime space\n",
+    });
 
     const proc: RuntimeProcess = {
       pid: runId,
@@ -336,46 +468,9 @@ export class Kernel {
     };
     this.mountProcess(proc);
     agents.setStatus(agent.id, "planning");
+    agentRuns.upsert({ ...run, status: "planning" });
 
-    let run: AgentRunRecord = {
-      id: runId,
-      agentId: agent.id,
-      goal,
-      status: "planning",
-      executionId: execId,
-      steps: [],
-      result: null,
-      createdAt: nowIso(),
-      finishedAt: null,
-    };
-    agentRuns.upsert(run);
-
-    if (cached) {
-      run = {
-        ...run,
-        status: "done",
-        steps: [
-          {
-            n: 0,
-            name: "cache-hit",
-            uses: "kernel.cache.get",
-            status: "ok",
-            input: { cacheKey },
-            output: { executionId: cached.id },
-            path: ObjectPath.named("agentStep", { id: agent.id, runId, n: "0" }).resolve(),
-            at: nowIso(),
-          },
-        ],
-        result: { cacheHit: true, executionId: cached.id },
-        finishedAt: nowIso(),
-      };
-      agentRuns.upsert(run);
-      this.unmountProcess(runId);
-      agents.setStatus(agent.id, "idle");
-      return run;
-    }
-
-    const steps = await runHarness({ kernel: this, agent, goal, runId, execution });
+    const steps = await runHarness({ kernel: this, agent, goal: run.goal, runId, execution });
     persistSteps(this, agent, runId, steps);
 
     jobs[0] = {
@@ -394,23 +489,31 @@ export class Kernel {
       ...execution,
       status: "resolved",
       conclusion: "success",
+      startedAt: execution.startedAt ?? nowIso(),
       finishedAt: nowIso(),
       jobs,
       logs: execution.logs + steps.map((s) => `[${s.uses}] ${s.name} → ${s.status}\n`).join(""),
     });
 
-    const obj = this.resolveExecution(execId);
-
-    run = {
+    const obj = this.resolveExecution(execution.id);
+    const done: AgentRunRecord = {
       ...run,
       status: "done",
       steps,
-      result: { objectPath: obj.path, executionId: execId, cacheKey },
+      result: { objectPath: obj.path, executionId: execution.id, cacheKey: execution.cacheKey },
       finishedAt: nowIso(),
     };
-    agentRuns.upsert(run);
+    agentRuns.upsert(done);
     agents.setStatus(agent.id, "idle");
-    return run;
+    this.journal("execute", obj.path, { runId, cacheKey: execution.cacheKey });
+    return done;
+  }
+
+  /** CLI convenience: enqueue + execute (o runner é o CPU). */
+  async runAgent(goal: string, agentId = "harness"): Promise<AgentRunRecord> {
+    const queued = this.enqueueAgent(goal, agentId);
+    if (queued.status === "done") return queued;
+    return this.execute(queued.id);
   }
 
   /* ---------- syscalls (CRUD+) ---------- */
@@ -430,8 +533,6 @@ export class Kernel {
     this.ensureSeeded();
     return syscalls.list();
   }
-
-  /* ---------- rules CRUD+ ---------- */
 
   listRules() {
     this.ensureSeeded();
@@ -468,6 +569,11 @@ export class Kernel {
   private trace(name: string, args: unknown, result: unknown, p: string | null) {
     syscalls.insert(name, args, result, p);
   }
+}
+
+function stripLive(p: LiveProc): RuntimeProcess {
+  const { expiresAtMs: _, ...rest } = p;
+  return rest;
 }
 
 function persistSteps(kernel: Kernel, agent: AgentRecord, runId: string, steps: AgentStep[]) {
@@ -511,14 +617,4 @@ let singleton: Kernel | undefined;
 export function getKernel(): Kernel {
   if (!singleton) singleton = new Kernel();
   return singleton;
-}
-
-function fakeSha(): string {
-  return Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-}
-
-function hashGoal(goal: string): string {
-  let h = 0;
-  for (let i = 0; i < goal.length; i++) h = (h * 31 + goal.charCodeAt(i)) >>> 0;
-  return h.toString(16);
 }

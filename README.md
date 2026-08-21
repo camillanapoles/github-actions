@@ -73,6 +73,7 @@ npm run dev           # UI em http://localhost:3000  (0.0.0.0)
 
 ```bash
 npx tsx src/cli/agent.ts --goal "Indexar cache e persistir objetos"
+npx tsx src/cli/agent.ts --drain          # CPU da fila (HTTP só enfileira)
 npx tsx src/cli/agent.ts --agent cache-weaver --goal "Tecer /cache/{workflow}/{sha}/{id}"
 ```
 

@@ -1,7 +1,8 @@
-import { nid, nowIso } from "./client";
+import { nowIso } from "./client";
 import { agentRuns, agents, executions, objects, rules, runtime } from "./repo";
 import { ObjectPath, PATTERNS } from "@/domain/path";
-import type { ExecutionRecord, JobState, RuntimeProcess } from "@/domain/types";
+import { cacheKey as casKey } from "@/domain/cas";
+import type { ExecutionRecord, JobState } from "@/domain/types";
 
 export function seedIfEmpty() {
   if (objects.list({ limit: 1 }).length > 0) return;
@@ -96,22 +97,25 @@ export function seed() {
     "d4e5f60718293a4b5c6d7e8f90123456789abcde",
   ];
 
-  const processes: RuntimeProcess[] = [];
+  const seenKeys = new Set<string>();
 
   for (let i = 0; i < 12; i++) {
     const wf = workflows[i % workflows.length];
     const sha = shas[i % shas.length];
     const id = `ex_${(1000 + i).toString(36)}`;
     const runId = `98765${100 + i}`;
-    const cacheHit = i % 3 === 0;
-    const inRuntime = i === 1 || i === 5;
     const failed = i === 8;
-    const jobs = makeJobs(wf.file, failed, inRuntime);
-    const status = inRuntime ? "in_runtime" : failed ? "failed" : "cached";
+    const cacheKey = casKey({
+      workflow: wf.file,
+      extra: { sha, slot: String(i % 4) },
+    });
+    const cacheHit = seenKeys.has(cacheKey);
+    seenKeys.add(cacheKey);
+    const jobs = makeJobs(wf.file, failed, false);
+    const status = failed ? "failed" : "cached";
     const created = new Date(Date.now() - (12 - i) * 3600_000).toISOString();
     const started = new Date(Date.parse(created) + 2000).toISOString();
-    const finished = inRuntime ? null : new Date(Date.parse(started) + 40_000 + i * 1200).toISOString();
-    const cacheKey = `actos-${wf.file}-${sha.slice(0, 12)}-${i % 4}`;
+    const finished = new Date(Date.parse(started) + 40_000 + i * 1200).toISOString();
 
     const rec: ExecutionRecord = {
       id,
@@ -119,7 +123,7 @@ export function seed() {
       workflow: wf.file,
       event: wf.event,
       status,
-      conclusion: inRuntime ? null : failed ? "failure" : "success",
+      conclusion: failed ? "failure" : "success",
       sha,
       branch: i % 2 === 0 ? "main" : "arena/01a01e33-github-actions",
       actor: i % 2 === 0 ? "camillanapoles" : "actos-bot",
@@ -133,48 +137,35 @@ export function seed() {
       createdAt: created,
     };
 
-    if (status === "cached" || status === "failed") {
-      const obj = objects.upsert({
-        id,
-        kind: "execution",
-        path: ObjectPath.named("object", { kind: "execution", id }).resolve(),
-        pattern: PATTERNS.object,
-        payload: rec,
-        metadata: { cacheKey, runId },
-        createdAt: created,
-      });
-      rec.objectId = obj.id;
-      objects.upsert({
-        id: `cache_${id}`,
-        kind: "cache",
-        path: ObjectPath.named("cache", { workflow: wf.file, sha, id }).resolve(),
-        pattern: PATTERNS.cache,
-        payload: {
-          hit: cacheHit,
-          executionId: id,
-          workflow: wf.file,
-          sha,
-          conclusion: rec.conclusion,
-        },
-        metadata: { source: "seed" },
-        createdAt: created,
-      });
-    } else {
-      processes.push({
-        pid: runId,
-        runId,
+    const obj = objects.upsert({
+      id,
+      kind: "execution",
+      path: ObjectPath.named("object", { kind: "execution", id }).resolve(),
+      pattern: PATTERNS.object,
+      payload: rec,
+      metadata: { cacheKey, runId },
+      createdAt: created,
+    });
+    rec.objectId = obj.id;
+    objects.upsert({
+      id: `cache_${id}`,
+      kind: "cache",
+      path: ObjectPath.named("cache", { workflow: wf.file, sha, id }).resolve(),
+      pattern: PATTERNS.cache,
+      payload: {
+        hit: cacheHit,
+        executionId: id,
         workflow: wf.file,
-        kind: wf.file.includes("agent") ? "agent" : "action",
-        status: "running",
-        startedAt: started,
-        path: ObjectPath.named("runtimeRun", { id: runId }).resolve(),
-        memoryHint: `${jobs.length} jobs`,
-      });
-    }
+        sha,
+        conclusion: rec.conclusion,
+      },
+      metadata: { source: "seed", cacheKey },
+      createdAt: created,
+    });
     executions.upsert(rec);
   }
 
-  runtime.save(processes);
+  runtime.save([]);
 
   objects.upsert({
     id: "manifest",
@@ -204,7 +195,7 @@ export function seed() {
         uses: "kernel.ps",
         status: "ok",
         input: {},
-        output: { processes: processes.length },
+        output: { processes: 0 },
         path: "/agents/harness/runs/arun_seed/steps/1",
         at: ts,
       },
@@ -274,7 +265,7 @@ function makeJobs(workflow: string, failed: boolean, running: boolean): JobState
 function logFor(workflow: string, status: string, cacheHit: boolean): string {
   return [
     `##[group] ${workflow}`,
-    cacheHit ? "Cache hit for key actos-*" : "Cache miss — entering unique runtime space",
+    cacheHit ? "CAS hit" : "CAS miss — entering unique runtime space",
     `status=${status}`,
     "Write objects at /objects/{kind}/{id}",
     "Apply rules on path",

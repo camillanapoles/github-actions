@@ -161,14 +161,14 @@ Não abrir LLM, Postgres, nem microserviços. Cortar o analog até ser verdade n
 
 Audit + este plano. PR aberto. Sem merge.
 
-### F1 — CAS + journal *local* (ainda SQLite, mas honesto)
+### F1 — CAS + journal *local* — **feito** (`[arena-agent]` neste ramo)
 
-- Tirar `fakeSha()`. `cacheKey = sha256(goal + workflow + inputs)`.
-- Tabela `events` append-only; `resolve` numa transação.
-- Runtime in-memory + TTL; seed não deixa `in_runtime` eterno.
-- `runAgent` na API só enfileira (objecto `queued`); quem corre é CLI/Action.
+- `cacheKey = sha256(actos/v1 || workflow || goal || extras)` — `src/domain/cas.ts`. Sem SHA aleatório.
+- Tabela `events` append-only; `resolveExecution` em `tx()`.
+- Runtime = `Map` in-memory + TTL 30min + reap. Seed já não monta processos eternos.
+- `POST /api/agents/run` e o form **só enfileiram**. CPU = `npx tsx src/cli/agent.ts --drain` / `--goal` / botão drain (Action analog local).
 
-Entrega: HIT real; page async continua igual.
+Entrega: HIT real no mesmo goal; page async inalterada.
 
 ### F2 — Git como L3 (o FS)
 

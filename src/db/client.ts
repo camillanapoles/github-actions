@@ -93,6 +93,16 @@ CREATE TABLE IF NOT EXISTS syscalls (
   path TEXT,
   created_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS events (
+  id TEXT PRIMARY KEY,
+  seq INTEGER NOT NULL,
+  op TEXT NOT NULL,
+  path TEXT,
+  payload TEXT NOT NULL,
+  at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_events_seq ON events(seq);
 `;
 
 export function db(): DatabaseSync {
@@ -112,4 +122,21 @@ export function nowIso(): string {
 export function nid(prefix: string): string {
   const rand = Math.random().toString(36).slice(2, 8);
   return `${prefix}_${Date.now().toString(36)}${rand}`;
+}
+
+export function tx<T>(fn: () => T): T {
+  const d = db();
+  d.exec("BEGIN");
+  try {
+    const out = fn();
+    d.exec("COMMIT");
+    return out;
+  } catch (err) {
+    try {
+      d.exec("ROLLBACK");
+    } catch {
+      /* ignore */
+    }
+    throw err;
+  }
 }

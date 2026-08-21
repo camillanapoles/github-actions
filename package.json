@@ -9,6 +9,7 @@
     "start": "next start --hostname 0.0.0.0 --port 3000",
     "seed": "npx tsx src/db/seed.ts",
     "agent": "npx tsx src/cli/agent.ts",
+    "drain": "npx tsx src/cli/agent.ts --drain",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts"
   },
   "dependencies": {

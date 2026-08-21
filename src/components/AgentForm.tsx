@@ -12,7 +12,7 @@ function Submit() {
       disabled={pending}
       className="rounded-md bg-agent px-4 py-2 font-mono text-xs font-medium text-ink-950 disabled:opacity-50"
     >
-      {pending ? "no runtime…" : "disparar harness"}
+      {pending ? "enqueue…" : "enfileirar (não é o CPU)"}
     </button>
   );
 }
@@ -38,7 +38,7 @@ export function AgentForm({ agentId = "harness" }: { agentId?: string }) {
         defaultValue="Indexar o espaço único, persistir objetos e cachear o resultado da Action."
       />
       <div className="flex items-center justify-between gap-3">
-        <p className="font-mono text-[11px] text-mute">backend-only · GitHub Action analog</p>
+        <p className="font-mono text-[11px] text-mute">HTTP = fila · CPU = CLI --drain / Action</p>
         <Submit />
       </div>
       {msg ? <p className="font-mono text-xs text-runtime">{msg}</p> : null}

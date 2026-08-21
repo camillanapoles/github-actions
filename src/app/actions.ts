@@ -7,13 +7,28 @@ export async function runAgentAction(formData: FormData) {
   const goal = String(formData.get("goal") ?? "").trim();
   const agentId = String(formData.get("agentId") ?? "harness");
   if (!goal) return { ok: false as const, error: "goal vazio" };
-  const run = await getKernel().runAgent(goal, agentId);
+  const run = getKernel().enqueueAgent(goal, agentId);
   revalidatePath("/");
   revalidatePath("/agentes");
   revalidatePath("/execucoes");
   revalidatePath("/runtime");
   revalidatePath("/objetos");
-  return { ok: true as const, id: run.id, status: run.status, cache: run.steps[0]?.uses === "kernel.cache.get" };
+  return {
+    ok: true as const,
+    id: run.id,
+    status: run.status,
+    cache: Boolean((run.result as { cacheHit?: boolean })?.cacheHit),
+  };
+}
+
+export async function drainAction(): Promise<void> {
+  await getKernel().drain(8);
+  revalidatePath("/");
+  revalidatePath("/agentes");
+  revalidatePath("/execucoes");
+  revalidatePath("/runtime");
+  revalidatePath("/objetos");
+  revalidatePath("/sys");
 }
 
 export async function syscallAction(formData: FormData) {

@@ -26,7 +26,7 @@ export default async function HomePage() {
           tone="cache"
         />
         <Metric label="objetos" value={stats.objects} hint={`${kinds.length} kinds`} tone="object" />
-        <Metric label="regras ativas" value={stats.rules} hint={`${stats.agents} agentes`} tone="agent" />
+        <Metric label="fila agente" value={stats.queue ?? 0} hint="HTTP enqueue · CPU = drain" tone="agent" />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-5">

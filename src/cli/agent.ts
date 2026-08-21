@@ -1,8 +1,9 @@
 /**
- * CLI do harness agentic.
- * Este é o processo que o GitHub Action executa — backend puro.
+ * CLI = CPU. A API só enfileira; este processo (ou a GitHub Action) executa.
  *
  *   npx tsx src/cli/agent.ts --goal "indexar cache" --agent harness
+ *   npx tsx src/cli/agent.ts --drain
+ *   npx tsx src/cli/agent.ts --drain --limit 4
  */
 import { getKernel } from "@/domain/kernel";
 import { seedIfEmpty } from "@/db/seed";
@@ -13,11 +14,27 @@ function arg(name: string, fallback = ""): string {
   return process.env[name.toUpperCase()] ?? fallback;
 }
 
+function hasFlag(name: string): boolean {
+  return process.argv.includes(`--${name}`);
+}
+
 async function main() {
   seedIfEmpty();
+  const kernel = getKernel();
+
+  if (hasFlag("drain")) {
+    const limit = Number(arg("limit", "8"));
+    console.log(`[actos] drain queue limit=${limit} waiting=${kernel.listQueue().length}`);
+    const out = await kernel.drain(limit);
+    for (const run of out) {
+      console.log(`[actos] run=${run.id} status=${run.status} cas=${(run.result as { cacheKey?: string })?.cacheKey ?? ""}`);
+    }
+    console.log(`[actos] drained ${out.length}`);
+    return;
+  }
+
   const goal = arg("goal", process.env.GOAL ?? "Indexar execuções cacheadas e persistir objetos.");
   const agent = arg("agent", process.env.AGENT_ID ?? "harness");
-  const kernel = getKernel();
   console.log(`[actos] unique space processes=${kernel.ps().length}`);
   console.log(`[actos] agent=${agent} goal=${JSON.stringify(goal)}`);
   const run = await kernel.runAgent(goal, agent);

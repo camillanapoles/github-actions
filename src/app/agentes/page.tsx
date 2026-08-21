@@ -3,17 +3,31 @@ import { getKernel } from "@/domain/kernel";
 import { AgentForm } from "@/components/AgentForm";
 import { Card, PathView, Pill, Title } from "@/components/ui";
 import { ago } from "@/lib/format";
+import { drainAction } from "@/app/actions";
 
 export default async function AgentesPage() {
   const k = getKernel();
   const list = k.listAgents();
   const runs = k.listAgentRuns();
+  const queue = k.listQueue();
 
   return (
     <div>
-      <Title sub="IA agentic harness que usa workflow. O agente não corre no browser: é GitHub Action (harness/github/agent-harness.yml) e, localmente, o mesmo CLI (src/cli/agent.ts). Cada step é objeto em /agents/{id}/runs/{runId}/steps/{n}.">
+      <Title sub="F1: HTTP só enfileira. O CPU é o CLI (`--drain` / `--goal`) ou a GitHub Action. Cache é CAS (sha256 do goal+workflow) — o mesmo goal é HIT. Runtime é RAM com TTL, não SQLite eterno.">
         Harness agentic
       </Title>
+
+      <Card className="mb-6 flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <div>
+          <div className="font-mono text-[11px] uppercase tracking-widest text-agent">fila</div>
+          <p className="mt-1 text-sm text-mute">{queue.length} run(s) queued — não estão no runtime até o CPU as pegar.</p>
+        </div>
+        <form action={drainAction}>
+          <button className="rounded-md bg-runtime px-4 py-2 font-mono text-xs font-medium text-ink-950">
+            drain (CPU local)
+          </button>
+        </form>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         {list.map((a) => (
