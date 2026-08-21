@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt2cqkuwzfarvh_s4",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/4",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 4,
+    "name": "act/Consultar cache de execuções",
+    "uses": "kernel.cache.get",
+    "status": "ok",
+    "input": {
+      "goal": "F2 gitfs smoke",
+      "with": {}
+    },
+    "output": {
+      "cacheKey": "f0eec295110bc0edfb93353985dfc52644ff259a8ef2ea88e52cfc5e20236312",
+      "hit": false
+    },
+    "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/4",
+    "at": "2026-08-21T02:50:25.735Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
