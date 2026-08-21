@@ -46,10 +46,12 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 - [ ] E11 CodeQL *actions* no PR (falha esperada sem YAML no arena)
 - [ ] E12 Pages → `.actos-cdn` / `actos/cdn` (não `main` `/`)
 - [ ] E14b ruleset anti force-push em `actos/fs`
-- [x] E16 CI `d9a9ede` / `0442cac` verde — `[sucesso sem debito]`
-- [ ] E17 push tags `actos/obj/*` no origin
+- [x] E16 CI `d9a9ede` / `0442cac` / `b8f7e3b` verde — `[sucesso sem debito]`
+- [x] E17 tags `actos/obj/*` no origin (13) — `[sucesso sem debito]`
+- [x] CPU local `smoke cpu github` → L3 `62ad489` — `[sucesso sem debito]`
+- [x] Skill `/loop` CI `b8f7e3b` 15s → success `32532886761` — `[sucesso sem debito]`
 - [ ] E12b trampolim `cdn-pages.yml` na `main` (humano copiar)
-- [x] Skill `/loop` (15s while) — nesta entrega
+- [ ] E9 runner GitHub (0 runs agent-harness; analog local já correu)
 
 ---
 
@@ -82,7 +84,9 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `8a231b3` | main | feat: actos.slice on agent-harness (humano E8b) |
 | `d9a9ede` | arena | injecção sleep→captura→continua + E8b |
 | `0442cac` | arena | captura CI verde; E9 dispatch 403 |
-| *este commit* | arena | skill /loop 15s + trampolim cdn-pages |
+| `b8f7e3b` | arena | skill /loop + cdn-pages.yml |
+| `62ad489` | actos/fs | smoke cpu github + /proc/stat (disco vivo) |
+| *este commit* | arena | /loop RETURN ci success; E17 tags; L3 avançou |
 
 `actos/fs` vs `main`: ahead cresce; behind cresce quando a `main` ganha trampolim. Behind correcto.
 
