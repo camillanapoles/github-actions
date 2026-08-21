@@ -11,6 +11,7 @@ import {
   syscalls,
 } from "@/db/repo";
 import { cacheKey as casKey } from "./cas";
+import { cdnStats, gc as cdnGc, l1GetByPath, l1List, l1Put, l2List, l2Put } from "./cdn";
 import { gitfs } from "./gitfs";
 import { ObjectPath, PATTERNS } from "./path";
 import { RuleEngine } from "./rules";
@@ -78,7 +79,40 @@ export class Kernel {
       rules: rules.list().filter((r) => r.enabled).length,
       queue: agentRuns.queued().length,
       gitfs: gitfs().status(),
+      cdn: cdnStats(),
     };
+  }
+
+  cdn() {
+    this.ensureSeeded();
+    return { stats: cdnStats(), l1: l1List(), l2: l2List() };
+  }
+
+  lookup(p: string): { layer: "L1" | "L3-sqlite" | "miss"; path: string; body?: unknown } {
+    this.ensureSeeded();
+    const edge = l1GetByPath(p);
+    if (edge) return { layer: "L1", path: p, body: edge.body };
+    const obj = objects.byPath(p);
+    if (obj) return { layer: "L3-sqlite", path: p, body: obj.payload };
+    return { layer: "miss", path: p };
+  }
+
+  promoteCdn() {
+    this.ensureSeeded();
+    const { evicted, promote } = cdnGc();
+    let promoted = 0;
+    for (const e of promote) {
+      const hit = l1GetByPath(e.path);
+      if (!hit) continue;
+      try {
+        gitfs().write(e.path, hit.body, `promote L1→L3 ${e.sha.slice(0, 12)}`);
+        promoted += 1;
+      } catch {
+        /* origin optional */
+      }
+    }
+    this.journal("cdn.gc", null, { evicted: evicted.length, promoted });
+    return { evicted: evicted.length, promoted };
   }
 
   gitStatus() {
@@ -236,6 +270,12 @@ export class Kernel {
         finishedAt: ex.finishedAt ?? nowIso(),
       });
       this.unmountProcess(ex.runId);
+      try {
+        const entry = l1Put(obj.path, obj);
+        l2Put({ sha: entry.sha, path: obj.path, runId: ex.runId });
+      } catch {
+        /* L1/L2 best-effort */
+      }
       this.journal("resolve", obj.path, { executionId: id, cachePath, cacheKey: ex.cacheKey });
       this.trace("resolve", { executionId: id }, { objectId: obj.id, cachePath }, obj.path);
       return obj;
@@ -591,17 +631,23 @@ export class Kernel {
         2,
       ),
     );
+    const body = {
+      id: obj.id,
+      kind: obj.kind,
+      path: obj.path,
+      pattern: obj.pattern,
+      payload: obj.payload,
+      metadata: obj.metadata,
+    };
     try {
-      gitfs().write(obj.path, {
-        id: obj.id,
-        kind: obj.kind,
-        path: obj.path,
-        pattern: obj.pattern,
-        payload: obj.payload,
-        metadata: obj.metadata,
-      });
+      gitfs().write(obj.path, body);
     } catch {
       /* L3 origin is best-effort until git is available */
+    }
+    try {
+      l1Put(obj.path, body);
+    } catch {
+      /* L1 edge */
     }
   }
 

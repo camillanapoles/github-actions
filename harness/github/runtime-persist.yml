@@ -1,6 +1,4 @@
-# Depois que uma Action sai do espaço único (runtime),
-# o resultado resolvido vira objeto e é armazenado em
-# /objects/{kind}/{id} e /cache/{workflow}/{sha}/{id}.
+# workflow_run → resolve. L2 = ticket, não o blob.
 
 name: runtime-persist
 
@@ -15,35 +13,35 @@ on:
         required: false
         type: string
 
+concurrency:
+  group: actos-fs
+  cancel-in-progress: false
+
 jobs:
   persist:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - name: Resolve → object → path
+      - name: L2 ticket only
         env:
           SOURCE_RUN: ${{ github.event.workflow_run.id || github.event.inputs.run_id || github.run_id }}
-        run: |
-          mkdir -p "data/objects/objects/execution" "data/objects/cache"
-          node --experimental-sqlite -e "
-            const fs = require('fs');
-            const id = process.env.SOURCE_RUN;
-            const obj = {
-              pattern: '/objects/{kind}/{id}',
-              kind: 'execution',
-              id,
-              path: '/objects/execution/' + id,
-              payload: { source: 'runtime-persist', run: id, sha: process.env.GITHUB_SHA },
-            };
-            fs.writeFileSync('data/objects/objects/execution/' + id + '.json', JSON.stringify(obj, null, 2));
-            console.log('resolved', obj.path);
-          "
+        run: npx tsx src/cli/gc.ts --ticket "$SOURCE_RUN"
       - uses: actions/upload-artifact@v4
         with:
-          name: resolved-${{ github.run_id }}
-          path: data/objects/
+          name: ticket-${{ github.run_id }}
+          path: data/tickets/
+          retention-days: 1
+      - name: Push L3 if origin allowed
+        if: github.event_name != 'pull_request'
+        run: npx tsx src/cli/fs-sync.ts --push
+        continue-on-error: true

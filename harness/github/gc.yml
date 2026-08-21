@@ -1,0 +1,46 @@
+# Promote-before-evict: L1 (7d LRU) → L3 actos/fs before GitHub drops the edge.
+# Mutex on the VFS. Never force-push actos/fs.
+
+name: actos-gc
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: actos-fs
+  cancel-in-progress: false
+
+jobs:
+  gc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Restore L1 (to inspect / promote)
+        uses: actions/cache@v4
+        with:
+          path: .actos-l1
+          key: actos-l1-${{ github.sha }}
+          restore-keys: |
+            actos-l1-
+
+      - name: Promote hot L1 → L3, evict cold
+        run: npx tsx src/cli/gc.ts --promote
+
+      - name: Push origin disk
+        run: npx tsx src/cli/fs-sync.ts --push
+        continue-on-error: true

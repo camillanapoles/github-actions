@@ -12,6 +12,7 @@
     "drain": "npx tsx src/cli/agent.ts --drain",
     "fs:init": "npx tsx src/cli/fs-sync.ts --init",
     "fs:push": "npx tsx src/cli/fs-sync.ts --push",
+    "gc": "npx tsx src/cli/gc.ts --promote",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts"
   },
   "dependencies": {

@@ -12,3 +12,5 @@ data/objects
 .env.local
 .actos-fs/
 .actos-fs-index
+.actos-l1/
+data/tickets

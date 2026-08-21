@@ -181,14 +181,15 @@ Inspiração Puter: LL provider separado do inode. Ver [`puter-insights.md`](./p
 
 Entrega: o disco **é** um ramo git. Push para origin quando o remoto aceitar `actos/fs`.
 
-### F3 — L1/L2 como CDN edge
+### F3 — L1/L2 como CDN edge — **feito** neste ramo
 
-- `actions/cache` key = `actos-l1-{sha256}`; `restore-keys: actos-l1-`.
-- Artifact só `{sha, path, run_id}`, `retention-days: 1`.
-- Workflow `gc.yml` (schedule): lista caches; se idade > 5d e objecto ainda quente, commit em `actos/fs`; apaga L1 frio.
-- Nunca gravar L1 a partir de PR *como origem* — só atalho. Persist em `workflow_run` na default.
+- Local analog: `src/domain/cdn.ts` (`.actos-l1/{sha}`, tickets em `data/tickets/`).
+- `actions/cache` key `actos-l1-{hashFiles}-{ref}`; `restore-keys: actos-l1-`. **Não grava L1 em pull_request.**
+- Artifact = ticket `{sha, path, runId}`, `retention-days: 1` (nunca o blob).
+- `harness/github/gc.yml` — promote-before-evict, `concurrency: actos-fs`.
+- UI `/cdn`, CLI `npx tsx src/cli/gc.ts --promote|--ticket|--stat`.
 
-Entrega: HIT rápido no runner; origem sempre L3.
+Entrega: lookup L1 → SQLite/L3; L1 nunca é origem.
 
 ### F4 — CPU event-driven (agent as job)
 

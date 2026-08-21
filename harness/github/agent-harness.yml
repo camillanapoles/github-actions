@@ -1,7 +1,7 @@
-# Agentic AI harness — o próprio agente É uma GitHub Action.
-# Tudo é backend: o workflow é o programa, o runner é o CPU,
-# artifacts + cache são o disco, o kernel ACTOS persiste objetos
-# em paths (pattern + id) e aplica regras.
+# Agentic harness — CPU serverless.
+# L1 = actions/cache (edge, 7d, NÃO é origem).
+# L2 = artifact POINTER {sha, path, runId}, retention 1d.
+# L3 = git actos/fs (origin). PR never saves L1 as origin.
 
 name: agent-harness
 
@@ -22,17 +22,23 @@ on:
   issues:
     types: [opened, labeled]
 
+concurrency:
+  group: actos-cpu-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   harness:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: write
     env:
       GOAL: ${{ github.event.inputs.goal || github.event.client_payload.goal || github.event.issue.title || 'Indexar runtime e persistir objetos' }}
       AGENT_ID: ${{ github.event.inputs.agent_id || github.event.client_payload.agent_id || 'harness' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -41,46 +47,37 @@ jobs:
 
       - run: npm ci
 
-      - name: Restore object store (disco analog)
+      - name: Restore L1 edge (CAS, never origin)
         uses: actions/cache@v4
         with:
-          path: data/objects
-          key: actos-objects-${{ github.sha }}
+          path: .actos-l1
+          key: actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-${{ github.ref_name }}
           restore-keys: |
-            actos-objects-
+            actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-
+            actos-l1-
 
-      - name: Enter unique runtime space
-        run: echo "RUN_PATH=/runtime/runs/${GITHUB_RUN_ID}" >> "$GITHUB_ENV"
-
-      - name: Agent loop (workflow-backed)
+      - name: Agent loop (CPU)
         run: npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
 
-      - name: Persist objects at pattern+id
-        run: |
-          mkdir -p "data/objects/runtime/runs/${GITHUB_RUN_ID}"
-          node -e '
-            const fs = require("fs");
-            const id = process.env.GITHUB_RUN_ID;
-            const obj = {
-              pattern: "/runtime/runs/{id}",
-              id,
-              path: "/runtime/runs/" + id,
-              sha: process.env.GITHUB_SHA,
-              goal: process.env.GOAL,
-            };
-            fs.writeFileSync("data/objects/runtime/runs/" + id + "/meta.json", JSON.stringify(obj, null, 2));
-          '
+      - name: L2 ticket (pointer only)
+        run: npx tsx src/cli/gc.ts --ticket "$GITHUB_RUN_ID"
 
-      - name: Upload resolved objects (filesystem analog)
+      - name: Upload L2 pointer
         uses: actions/upload-artifact@v4
         with:
-          name: objects-${{ github.run_id }}
-          path: data/objects/
+          name: ticket-${{ github.run_id }}
+          path: data/tickets/
+          retention-days: 1
           if-no-files-found: warn
 
-      - name: Cache store
+      - name: Save L1 only off pull_request (origin shield)
+        if: github.event_name != 'pull_request'
         uses: actions/cache/save@v4
-        if: always()
         with:
-          path: data/objects
-          key: actos-objects-${{ github.sha }}-${{ github.run_id }}
+          path: .actos-l1
+          key: actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-${{ github.ref_name }}-${{ github.run_id }}
+
+      - name: Push L3 origin (actos/fs)
+        if: github.event_name != 'pull_request'
+        run: npx tsx src/cli/fs-sync.ts --push
+        continue-on-error: true
