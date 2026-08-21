@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3iqczwkr59e3_s7",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/7",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 7,
+    "name": "resolve/Resolver execução → objeto",
+    "uses": "kernel.resolve",
+    "status": "ok",
+    "input": {
+      "goal": "smoke cpu github",
+      "with": {}
+    },
+    "output": {
+      "pending": true,
+      "executionId": "ex_mt3iqczwo77a36"
+    },
+    "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/7",
+    "at": "2026-08-21T22:25:59.481Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
