@@ -328,6 +328,13 @@ export class AgentRunRepo {
     return rows.map((r) => this.map(r));
   }
 
+  sliced(limit = 16): AgentRunRecord[] {
+    const rows = db()
+      .prepare("SELECT * FROM agent_runs WHERE status = 'sliced' ORDER BY created_at ASC LIMIT ?")
+      .all(limit) as Record<string, unknown>[];
+    return rows.map((r) => this.map(r));
+  }
+
   upsert(run: AgentRunRecord): AgentRunRecord {
     db()
       .prepare(

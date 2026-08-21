@@ -165,22 +165,8 @@ export class Kernel {
     const paths: string[] = [];
     for (const p of gitfs().ls("/")) {
       if (p === "/proc/stat" || p.startsWith("/proc/")) continue;
-      const body = gitfs().read(p);
-      if (!body || typeof body !== "object") continue;
-      const rec = body as Partial<StoredObjectRecord> & { payload?: unknown };
-      const id = typeof rec.id === "string" && rec.id ? rec.id : p.replace(/\W+/g, "_").slice(0, 48);
-      const kind = typeof rec.kind === "string" && rec.kind ? rec.kind : kindFromPath(rec.path ?? p);
-      const objectPath = typeof rec.path === "string" && rec.path ? rec.path : p;
-      const parsed = ObjectPath.parse(objectPath);
-      objects.upsert({
-        id,
-        kind,
-        path: objectPath,
-        pattern: typeof rec.pattern === "string" && rec.pattern ? rec.pattern : (parsed?.pattern ?? PATTERNS.object),
-        payload: rec.payload ?? rec,
-        metadata: { ...(rec.metadata && typeof rec.metadata === "object" ? rec.metadata : {}), source: "hydrate-l3" },
-      });
-      paths.push(objectPath);
+      const rec = this.projectL3(p);
+      if (rec) paths.push(rec.path);
     }
     this.journal("hydrate", null, { n: paths.length });
     return { n: paths.length, paths };
@@ -188,9 +174,28 @@ export class Kernel {
 
   /* ---------- filesystem (objects) ---------- */
 
+  private projectL3(p: string): StoredObjectRecord | null {
+    if (process.env.ACTOS_GITFS === "0") return null;
+    const body = gitfs().read(p);
+    if (!body || typeof body !== "object") return null;
+    const rec = body as Partial<StoredObjectRecord> & { payload?: unknown };
+    const id = typeof rec.id === "string" && rec.id ? rec.id : p.replace(/\W+/g, "_").slice(0, 48);
+    const kind = typeof rec.kind === "string" && rec.kind ? rec.kind : kindFromPath(rec.path ?? p);
+    const objectPath = typeof rec.path === "string" && rec.path ? rec.path : p;
+    const parsed = ObjectPath.parse(objectPath);
+    return objects.upsert({
+      id,
+      kind,
+      path: objectPath,
+      pattern: typeof rec.pattern === "string" && rec.pattern ? rec.pattern : (parsed?.pattern ?? PATTERNS.object),
+      payload: rec.payload ?? rec,
+      metadata: { ...(rec.metadata && typeof rec.metadata === "object" ? rec.metadata : {}), source: "hydrate-l3" },
+    });
+  }
+
   read(p: string): StoredObjectRecord {
     this.ensureSeeded();
-    const obj = objects.byPath(p);
+    const obj = objects.byPath(p) ?? this.projectL3(p);
     if (!obj) {
       throw new Error(`ENOENT: ${p}`);
     }
@@ -547,7 +552,7 @@ export class Kernel {
 
   async drain(limit = 8): Promise<AgentRunRecord[]> {
     this.ensureSeeded();
-    const batch = agentRuns.queued(limit);
+    const batch = [...agentRuns.queued(limit), ...agentRuns.sliced(limit)].slice(0, limit);
     const out: AgentRunRecord[] = [];
     for (const run of batch) {
       out.push(await this.execute(run.id));

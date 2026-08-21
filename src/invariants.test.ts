@@ -82,6 +82,17 @@ test("sucesso E13: ACTOS_SLICE_BUDGET_MS=1 no arranque não fatia sozinho (harne
   }
 });
 
+test("sucesso E18: drain retoma run sliced quando FORCE sai", async () => {
+  const k = getKernel();
+  const q = k.enqueueAgent("qa resume sliced " + Date.now());
+  process.env.ACTOS_SLICE_FORCE = "1";
+  const cut = await k.execute(q.id);
+  assert.equal(cut.status, "sliced");
+  delete process.env.ACTOS_SLICE_FORCE;
+  const out = await k.drain(8);
+  assert.ok(out.some((r) => r.id === q.id && r.status === "done"));
+});
+
 test("sucesso E13: ACTOS_SLICE_FORCE corta o CPU e deixa sliced", async () => {
   const k = getKernel();
   const q = k.enqueueAgent("qa slice force " + Date.now());
