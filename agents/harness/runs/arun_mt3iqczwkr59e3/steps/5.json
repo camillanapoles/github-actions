@@ -1,0 +1,32 @@
+{
+  "id": "arun_mt3iqczwkr59e3_s5",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/5",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 5,
+    "name": "act/Agir com syscalls do kernel",
+    "uses": "agent.act",
+    "status": "ok",
+    "input": {
+      "goal": "smoke cpu github",
+      "with": {}
+    },
+    "output": {
+      "summary": "Goal \"smoke cpu github\" observado no kernel.",
+      "cachedExecutions": 11,
+      "runtimeProcesses": 1,
+      "objectIndex": {
+        "rule-doc": 1,
+        "goal-result": 1,
+        "execution": 13,
+        "manifest": 1
+      }
+    },
+    "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/5",
+    "at": "2026-08-21T22:25:59.430Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
