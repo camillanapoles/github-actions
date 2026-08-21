@@ -1,0 +1,24 @@
+{
+  "id": "arun_mt2cqkuwzfarvh_s9",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/9",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 9,
+    "name": "resolve/Cachear resultado",
+    "uses": "kernel.cache.put",
+    "status": "ok",
+    "input": {
+      "goal": "F2 gitfs smoke",
+      "with": {}
+    },
+    "output": {
+      "cacheKey": "f0eec295110bc0edfb93353985dfc52644ff259a8ef2ea88e52cfc5e20236312"
+    },
+    "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/9",
+    "at": "2026-08-21T02:50:25.777Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
