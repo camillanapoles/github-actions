@@ -59,6 +59,12 @@ git checkout arena/01a01e33-github-actions
 git pull
 ```
 
+## Confirmado na `main` (`9487a17`)
+
+`ci.yml` já tem `permissions: contents: read` no workflow **e** no job `qa`. O aviso dos codebots na linha 9 fica resolvido depois deste push.
+
+CodeQL **Analyze (actions)** no PR #1 pode falhar com *no source code seen*: o ramo `arena/` **não tem** `.github/workflows/` (o token Arena não escreve workflows). Os YAML vivem só na `main`. É esperado — não é regressão do trampolim. CodeQL em `push` à `main` (onde os YAML estão) é o scan que conta.
+
 ## Codebots: `ci.yml` sem `permissions`
 
 Corrigido em `harness/bootstrap-main/ci.yml`:
