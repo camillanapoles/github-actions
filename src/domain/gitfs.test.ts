@@ -36,6 +36,50 @@ test("sucesso: write + ls-tree + read sem checkout do ramo", () => {
   assert.equal(branch, "main");
 });
 
+test("sucesso E14: tagCas é idempotente e não faz overwrite", () => {
+  const repo = tempRepo();
+  process.env.ACTOS_GIT_DIR = path.join(repo, ".git");
+  process.env.ACTOS_FS_WORK = path.join(repo, "wt");
+  process.env.ACTOS_FS_INDEX = path.join(repo, "idx");
+  resetGitfs();
+  const fsx = new GitFs();
+  fsx.write("/objects/note/n2", { v: 1 });
+  const sha = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  const first = fsx.tagCas(sha, "/objects/note/n2");
+  const second = fsx.tagCas(sha, "/objects/note/n2");
+  assert.equal(first.created, true);
+  assert.equal(second.created, false);
+  assert.equal(fsx.listCasTags().length, 1);
+});
+
+test("sucesso E15: kernel hydrateFromL3 projecta o tree", async () => {
+  const repo = tempRepo();
+  process.env.ACTOS_GIT_DIR = path.join(repo, ".git");
+  process.env.ACTOS_FS_WORK = path.join(repo, "wt");
+  process.env.ACTOS_FS_INDEX = path.join(repo, "idx");
+  process.env.ACTOS_GITFS = "1";
+  resetGitfs();
+  const fsx = new GitFs();
+  fsx.write("/objects/note/hyd1", {
+    id: "hyd1",
+    kind: "note",
+    path: "/objects/note/hyd1",
+    pattern: "/objects/{kind}/{id}",
+    payload: { from: "l3" },
+    metadata: {},
+  });
+  const { resetDb } = await import("@/db/client");
+  const { resetKernel, getKernel } = await import("@/domain/kernel");
+  resetDb();
+  resetKernel();
+  const k = getKernel();
+  const h = k.hydrateFromL3();
+  assert.ok(h.paths.includes("/objects/note/hyd1"));
+  const got = k.read("/objects/note/hyd1");
+  assert.deepEqual(got.payload, { from: "l3" });
+  process.env.ACTOS_GITFS = "0";
+});
+
 test("validação: attach recusa segundo órfão — usa o origin", () => {
   const origin = tempRepo();
   process.env.ACTOS_GIT_DIR = path.join(origin, ".git");

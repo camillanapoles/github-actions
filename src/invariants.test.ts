@@ -2,7 +2,7 @@ import "./test/env";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { getKernel } from "@/domain/kernel";
-import { pendingIrqs } from "@/domain/irq";
+import { githubDispatchBody, pendingIrqs } from "@/domain/irq";
 
 test("sucesso: enqueue não é CPU — fica queued e emite IRQ", () => {
   const k = getKernel();
@@ -67,6 +67,22 @@ test("sucesso F4: checkpoint emite IRQ actos.slice", () => {
   assert.equal(ck.irq.type, "actos.slice");
   assert.equal(ck.snapshot.kind, "snapshot");
   assert.match(ck.snapshot.path, /^\/objects\/snapshot\//);
+  const body = githubDispatchBody(ck.irq);
+  assert.equal(body.event_type, "actos.slice");
+});
+
+test("sucesso E13: ACTOS_SLICE_FORCE corta o CPU e deixa sliced", async () => {
+  const k = getKernel();
+  const q = k.enqueueAgent("qa slice force " + Date.now());
+  process.env.ACTOS_SLICE_FORCE = "1";
+  try {
+    const r = await k.execute(q.id);
+    assert.equal(r.status, "sliced");
+    assert.equal((r.result as { sliced?: boolean }).sliced, true);
+    assert.equal(k.ps().length, 0);
+  } finally {
+    delete process.env.ACTOS_SLICE_FORCE;
+  }
 });
 
 test("sucesso F6: ingest isola dois repos", () => {

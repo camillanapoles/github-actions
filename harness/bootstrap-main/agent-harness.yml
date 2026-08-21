@@ -19,7 +19,7 @@ on:
         default: arena/01a01e33-github-actions
         type: string
   repository_dispatch:
-    types: [agent.run]
+    types: [agent.run, actos.slice]
 
 permissions:
   contents: write
@@ -64,7 +64,12 @@ jobs:
             actos-l1-
 
       - name: CPU
-        run: npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
+        run: |
+          if [ "$ACTOS_SLICE" = "1" ]; then
+            npx tsx src/cli/agent.ts --slice --goal "$GOAL" --agent "$AGENT_ID"
+          else
+            npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
+          fi
 
       - name: L2 ticket
         run: npx tsx src/cli/gc.ts --ticket "$GITHUB_RUN_ID"

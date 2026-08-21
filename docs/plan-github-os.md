@@ -249,3 +249,16 @@ Entrega: o request HTTP não é o processo. O runner é.
 | gh-aw Cache vs Repo Memory | GitHub já admite as duas memórias — nós damos-lhes **path + regras + journal** |
 
 A usabilidade que criamos: **GitHub deixa de ser CI e passa a ser um computador serverless cujo disco é o repositório, cuja RAM é o cache, cujo CDN são Pages/tags, e cujo syscall é um workflow event-driven.**
+
+---
+
+## 9. AHEAD — protocolo (injeção permanente)
+
+Fonte viva: [`AHEAD.md`](./AHEAD.md). O agente **não** fecha um turno sem actualizar esse ficheiro.
+
+| Evento | Acção obrigatória |
+| --- | --- |
+| Item feito, sem residual | marcar **`[sucesso sem debito]`** no checklist |
+| Erro / parcial / 403 / CI fail | subitem na todolist: `ERRO <id>: … → fazer: …` |
+| Cada commit `[arena-agent]` | ledger + checklist + bloco **próxima actividade** |
+| `actos/fs` | ahead cresce (append); behind da `main` mantém-se |

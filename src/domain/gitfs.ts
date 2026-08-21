@@ -25,6 +25,7 @@ export type GitFsStatus = {
   workTree: string;
   attached: boolean;
   remoteHead: string | null;
+  casTags: string[];
 };
 
 function dirs() {
@@ -178,6 +179,26 @@ export class GitFs {
       .sort();
   }
 
+  /** Immutable CAS tag. Never overwrite an existing actos/obj/{sha}. */
+  tagCas(sha: string, objectPath: string): { ref: string; created: boolean } {
+    const hex = sha.replace(/[^0-9a-f]/gi, "").toLowerCase();
+    if (hex.length < 16) throw new Error(`gitfs: cas sha too short: ${sha}`);
+    const ref = `refs/tags/actos/obj/${hex}`;
+    const exists = git(["rev-parse", "--verify", ref]);
+    if (exists.ok) return { ref, created: false };
+    const head = this.ensure();
+    const msg = `cas ${hex.slice(0, 12)} ${objectPath}`;
+    const tagged = git(["tag", "-a", `actos/obj/${hex}`, "-m", msg, head]);
+    if (!tagged.ok) throw new Error(`gitfs tag: ${tagged.err || tagged.out}`);
+    return { ref, created: true };
+  }
+
+  listCasTags(): string[] {
+    const r = git(["for-each-ref", "--format=%(refname)", "refs/tags/actos/obj"]);
+    if (!r.ok || !r.out) return [];
+    return r.out.split("\n").filter(Boolean);
+  }
+
   status(): GitFsStatus {
     const refs = git(["for-each-ref", "--format=%(refname)", "refs/actos/runtime"]);
     const head = this.head();
@@ -188,7 +209,15 @@ export class GitFs {
       workTree: dirs().work,
       attached: Boolean(head),
       remoteHead: this.remoteHead(),
+      casTags: this.listCasTags(),
     };
+  }
+
+  pushTags(): { ok: boolean; out: string; n: number } {
+    const tags = this.listCasTags();
+    if (!tags.length) return { ok: true, out: "no cas tags", n: 0 };
+    const r = git(["push", REMOTE, "refs/tags/actos/obj/*"]);
+    return { ok: r.ok, out: r.ok ? `${tags.length} tags` : r.err || r.out, n: tags.length };
   }
 
   push(): { ok: boolean; out: string; head: string | null } {

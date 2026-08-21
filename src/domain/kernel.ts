@@ -10,12 +10,12 @@ import {
   rules,
   syscalls,
 } from "@/db/repo";
-import { cacheKey as casKey } from "./cas";
+import { cacheKey as casKey, cas } from "./cas";
 import { emitIrq, githubDispatchBody, pendingIrqs } from "./irq";
 import { publishObjects, publicDir } from "./public-cdn";
 import { cdnStats, gc as cdnGc, l1GetByPath, l1List, l1Put, l2List, l2Put } from "./cdn";
 import { gitfs } from "./gitfs";
-import { ObjectPath, PATTERNS, repoSlug } from "./path";
+import { kindFromPath, ObjectPath, PATTERNS, repoSlug } from "./path";
 import { RuleEngine } from "./rules";
 import type {
   AgentRecord,
@@ -151,6 +151,39 @@ export class Kernel {
   gitLs(prefix = "/") {
     this.ensureSeeded();
     return gitfs().ls(prefix);
+  }
+
+  /** E15 — SQLite is a projection. Replay L3 tree into the inode table. */
+  hydrateFromL3(): { n: number; paths: string[] } {
+    this.ensureSeeded();
+    if (process.env.ACTOS_GITFS === "0") return { n: 0, paths: [] };
+    try {
+      gitfs().attach();
+    } catch {
+      /* local ref may already exist */
+    }
+    const paths: string[] = [];
+    for (const p of gitfs().ls("/")) {
+      if (p === "/proc/stat" || p.startsWith("/proc/")) continue;
+      const body = gitfs().read(p);
+      if (!body || typeof body !== "object") continue;
+      const rec = body as Partial<StoredObjectRecord> & { payload?: unknown };
+      const id = typeof rec.id === "string" && rec.id ? rec.id : p.replace(/\W+/g, "_").slice(0, 48);
+      const kind = typeof rec.kind === "string" && rec.kind ? rec.kind : kindFromPath(rec.path ?? p);
+      const objectPath = typeof rec.path === "string" && rec.path ? rec.path : p;
+      const parsed = ObjectPath.parse(objectPath);
+      objects.upsert({
+        id,
+        kind,
+        path: objectPath,
+        pattern: typeof rec.pattern === "string" && rec.pattern ? rec.pattern : (parsed?.pattern ?? PATTERNS.object),
+        payload: rec.payload ?? rec,
+        metadata: { ...(rec.metadata && typeof rec.metadata === "object" ? rec.metadata : {}), source: "hydrate-l3" },
+      });
+      paths.push(objectPath);
+    }
+    this.journal("hydrate", null, { n: paths.length });
+    return { n: paths.length, paths };
   }
 
   /* ---------- filesystem (objects) ---------- */
@@ -590,6 +623,21 @@ export class Kernel {
     agents.setStatus(agent.id, "planning");
     agentRuns.upsert({ ...run, status: "planning" });
 
+    if (process.env.ACTOS_SLICE_FORCE === "1") {
+      const ck = this.checkpoint(runId, run.goal);
+      const sliced: AgentRunRecord = {
+        ...run,
+        status: "sliced",
+        result: { sliced: true, irq: githubDispatchBody(ck.irq), snapshot: ck.snapshot.path },
+        finishedAt: nowIso(),
+      };
+      agentRuns.upsert(sliced);
+      this.unmountProcess(runId);
+      agents.setStatus(agent.id, "idle");
+      this.journal("slice", ck.snapshot.path, { runId, irq: ck.irq.id });
+      return sliced;
+    }
+
     const steps = await runHarness({ kernel: this, agent, goal: run.goal, runId, execution });
     persistSteps(this, agent, runId, steps);
 
@@ -717,6 +765,8 @@ export class Kernel {
     if (process.env.ACTOS_GITFS !== "0") {
       try {
         gitfs().write(obj.path, body);
+        const sha = cas(obj.path, JSON.stringify(obj.payload));
+        gitfs().tagCas(sha, obj.path);
       } catch (err) {
         this.journal("gitfs.write.error", obj.path, { error: String(err) });
       }

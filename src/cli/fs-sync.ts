@@ -25,6 +25,10 @@ function main() {
     console.log("[actos/fs] head", head);
     console.log("[actos/fs]", JSON.stringify(fs.status(), null, 2));
   }
+  if (has("hydrate")) {
+    const h = getKernel().hydrateFromL3();
+    console.log("[actos/fs] hydrate", h.n);
+  }
   if (has("push")) {
     const attached = fs.attach();
     console.log("[actos/fs] attach", JSON.stringify(attached));
@@ -35,6 +39,8 @@ function main() {
     }
     const r = fs.push();
     console.log("[actos/fs] push", r.ok ? "ok" : r.out);
+    const tags = fs.pushTags();
+    console.log("[actos/fs] tags", tags.ok ? tags.out : tags.out);
     if (!r.ok) process.exit(1);
   }
 }

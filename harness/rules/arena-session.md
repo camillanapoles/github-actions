@@ -28,3 +28,11 @@ Até lá o fluxo automático é: commit + push no ramo `arena/…` + label/tag `
 | Dizer “continua” / novo pedido | Agente segue no mesmo `arena/<sessao>` |
 
 Tag de rastreio: **`arena-agent`** (commits, PR, label).
+
+## AHEAD (obrigatório em todo o turno)
+
+Ler e actualizar [`docs/AHEAD.md`](../../docs/AHEAD.md).
+
+- Sucesso sem residual → **`[sucesso sem debito]`**
+- Erro → subitem na todolist (`ERRO … → fazer: …`)
+- Cada commit → ledger (SHA) + checklist + próxima actividade

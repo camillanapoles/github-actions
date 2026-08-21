@@ -55,13 +55,15 @@ export function ackIrq(id: string) {
 
 /** Body for GitHub repository_dispatch — CPU remoto. */
 export function githubDispatchBody(irq: Irq) {
+  const event_type = irq.type === "actos.slice" ? "actos.slice" : "agent.run";
   return {
-    event_type: "agent.run",
+    event_type,
     client_payload: {
       goal: irq.goal,
       agent_id: irq.agentId ?? "harness",
       run_id: irq.runId,
       irq_id: irq.id,
+      slice: irq.type === "actos.slice",
     },
   };
 }

@@ -3,7 +3,8 @@
  *
  *   npx tsx src/cli/agent.ts --goal "indexar cache" --agent harness
  *   npx tsx src/cli/agent.ts --drain
- *   npx tsx src/cli/agent.ts --drain --limit 4
+ *   npx tsx src/cli/agent.ts --slice
+ *   npx tsx src/cli/agent.ts --checkpoint <runId>
  */
 import { getKernel } from "@/domain/kernel";
 import { seedIfEmpty } from "@/db/seed";
@@ -21,6 +22,30 @@ function hasFlag(name: string): boolean {
 async function main() {
   seedIfEmpty();
   const kernel = getKernel();
+
+  if (hasFlag("hydrate")) {
+    const h = kernel.hydrateFromL3();
+    console.log("[actos] hydrate", h.n);
+    return;
+  }
+
+  if (hasFlag("checkpoint")) {
+    const runId = arg("checkpoint") || arg("run");
+    if (!runId) throw new Error("--checkpoint precisa de runId");
+    const ck = kernel.checkpoint(runId, arg("goal", process.env.GOAL));
+    console.log("[actos] checkpoint", JSON.stringify({ path: ck.snapshot.path, irq: ck.irq }));
+    return;
+  }
+
+  if (hasFlag("slice") || process.env.ACTOS_SLICE === "1") {
+    const h = kernel.hydrateFromL3();
+    console.log(`[actos] slice hydrate=${h.n} queue=${kernel.listQueue().length}`);
+    const out = await kernel.drain(Number(arg("limit", "8")));
+    for (const run of out) {
+      console.log(`[actos] run=${run.id} status=${run.status}`);
+    }
+    return;
+  }
 
   if (hasFlag("drain")) {
     const limit = Number(arg("limit", "8"));

@@ -12,6 +12,7 @@ export type AgentStatus =
   | "acting"
   | "persisting"
   | "done"
+  | "sliced"
   | "failed";
 
 export type RuleOp = "read" | "write" | "exec" | "*";

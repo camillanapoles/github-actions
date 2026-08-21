@@ -63,14 +63,14 @@ Ramos: `main` trampolim · `arena/…` código · `actos/fs` disco. **Não mistu
 | Id | Evolução | Estado |
 | --- | --- | --- |
 | **E7** | `gitfs.attach()` ao origin; `ls`/`read` via `ls-tree`/`show`; recusar non-ff; `/proc/stat`; lookup L3-git; GC `--sync`; trampolim fetch+push **sem** continue-on-error; FileDb filtra literais; testes isolados | **neste commit** |
-| **E8** | Tu recopias `harness/bootstrap-main/*.yml` → `main` (token Arena não escreve workflows) | **bloqueado em ti** |
-| **E9** | Actions → `agent-harness` → Run `smoke cpu github` — primeiro write L3 *depois* do smoke F2 | **bloqueado em ti** |
-| **E10** | Settings → Actions → Workflow permissions **Read and write** (senão push L3 403) | **bloqueado em ti** |
-| **E11** | CodeQL: desmarcar linguagem *GitHub Actions* no PR, ou ignorar | opcional |
-| **E12** | Pages → árvore `.actos-cdn` / ramo `actos/cdn` (não `main` `/`) | humano |
-| **E13** | Slice 6h: `checkpoint()` + IRQ `actos.slice` já existe no kernel; o YAML `repository_dispatch` slice no trampolim ainda não | parcial |
-| **E14** | tags `actos/obj/{sha256}` + ruleset anti force-push em `actos/fs` | seguinte |
-| **E15** | Hydrate SQLite a partir do `ls-tree` (projecção verdadeira) | seguinte |
+| **E8** | trampolim na `main` | **`[sucesso sem debito]`** `38e6393` |
+| **E9** | Actions → `agent-harness` → Run `smoke cpu github` | bloqueado em ti |
+| **E10** | Settings → Actions → **Read and write** | bloqueado em ti |
+| **E11** | CodeQL actions no PR | opcional / fail esperado |
+| **E12** | Pages → `.actos-cdn` | humano |
+| **E13** | slice YAML + `status=sliced` + `--slice` | nesta entrega |
+| **E14** | tags `actos/obj/{sha}` | nesta entrega (local) |
+| **E15** | hydrate `ls-tree` → SQLite | nesta entrega |
 
 ## O que *não* fazer
 

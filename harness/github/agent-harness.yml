@@ -18,7 +18,7 @@ on:
         default: harness
         type: string
   repository_dispatch:
-    types: [agent.run]
+    types: [agent.run, actos.slice]
   issues:
     types: [opened, labeled]
 
@@ -40,10 +40,14 @@ jobs:
       NODE_NO_WARNINGS: "1"
       GOAL: ${{ github.event.inputs.goal || github.event.client_payload.goal || github.event.issue.title || 'Indexar runtime e persistir objetos' }}
       AGENT_ID: ${{ github.event.inputs.agent_id || github.event.client_payload.agent_id || 'harness' }}
+      ACTOS_SLICE: ${{ github.event.action == 'actos.slice' && '1' || '0' }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Attach L3 origin (actos/fs)
+        run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
 
       - uses: actions/setup-node@v6
         with:
@@ -62,7 +66,12 @@ jobs:
             actos-l1-
 
       - name: Agent loop (CPU)
-        run: npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
+        run: |
+          if [ "$ACTOS_SLICE" = "1" ]; then
+            npx tsx src/cli/agent.ts --slice --goal "$GOAL" --agent "$AGENT_ID"
+          else
+            npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
+          fi
 
       - name: L2 ticket (pointer only)
         run: npx tsx src/cli/gc.ts --ticket "$GITHUB_RUN_ID"

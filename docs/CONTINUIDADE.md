@@ -4,7 +4,7 @@ Sessão: `arena/01a01e33-github-actions` · tag `arena-agent` · PR **#1 ABERTO*
 
 Ideia original: GitHub Actions como **OS serverless**. Runner = CPU. Runtime = espaço único. Depois do resolve, tudo é **objeto** em `pattern + id`. Regras. Page async lê a projecção. O agente **é** a Action. Disco = ramo órfão `actos/fs`.
 
-Canónico: [`plan-github-os.md`](./plan-github-os.md) · facto 14/5 + cortes: [`EVOLUCOES.md`](./EVOLUCOES.md) · audit: [`audit.md`](./audit.md).
+Canónico: [`plan-github-os.md`](./plan-github-os.md) · ahead vivo: [`AHEAD.md`](./AHEAD.md) · cortes: [`EVOLUCOES.md`](./EVOLUCOES.md) · audit: [`audit.md`](./audit.md).
 
 ---
 
