@@ -1,0 +1,86 @@
+{
+  "id": "ex_mt2cqkuwn6hhcb",
+  "kind": "execution",
+  "path": "/objects/execution/ex_mt2cqkuwn6hhcb",
+  "pattern": "/objects/{kind}/{id}",
+  "payload": {
+    "id": "ex_mt2cqkuwn6hhcb",
+    "runId": "arun_mt2cqkuwzfarvh",
+    "workflow": "agent-harness.yml",
+    "event": "queue",
+    "status": "resolved",
+    "conclusion": "success",
+    "sha": "f0eec295110bc0edfb93353985dfc52644ff259a",
+    "branch": "arena/01a01e33-github-actions",
+    "actor": "actos-kernel",
+    "cacheKey": "f0eec295110bc0edfb93353985dfc52644ff259a8ef2ea88e52cfc5e20236312",
+    "cacheHit": false,
+    "startedAt": "2026-08-21T02:50:26.113Z",
+    "finishedAt": "2026-08-21T02:50:26.113Z",
+    "jobs": [
+      {
+        "id": "harness",
+        "name": "agentic-harness",
+        "status": "completed",
+        "startedAt": "2026-08-21T02:50:25.698Z",
+        "steps": [
+          {
+            "name": "plan/Inspecionar espaço único",
+            "conclusion": "success",
+            "durationMs": 19
+          },
+          {
+            "name": "plan/Ler memória (objetos permitidos)",
+            "conclusion": "success",
+            "durationMs": 26
+          },
+          {
+            "name": "plan/Planejar a partir do goal",
+            "conclusion": "success",
+            "durationMs": 33
+          },
+          {
+            "name": "act/Consultar cache de execuções",
+            "conclusion": "success",
+            "durationMs": 40
+          },
+          {
+            "name": "act/Agir com syscalls do kernel",
+            "conclusion": "success",
+            "durationMs": 47
+          },
+          {
+            "name": "act/Escrever objetos (pattern + id)",
+            "conclusion": "success",
+            "durationMs": 54
+          },
+          {
+            "name": "resolve/Resolver execução → objeto",
+            "conclusion": "success",
+            "durationMs": 61
+          },
+          {
+            "name": "resolve/Sair do runtime, persistir em path",
+            "conclusion": "success",
+            "durationMs": 68
+          },
+          {
+            "name": "resolve/Cachear resultado",
+            "conclusion": "success",
+            "durationMs": 75
+          }
+        ],
+        "conclusion": "success",
+        "finishedAt": "2026-08-21T02:50:26.113Z"
+      }
+    ],
+    "logs": "queued — waiting for CPU (CLI/Action)\n[kernel.ps] plan/Inspecionar espaço único → ok\n[kernel.ls] plan/Ler memória (objetos permitidos) → ok\n[agent.plan] plan/Planejar a partir do goal → ok\n[kernel.cache.get] act/Consultar cache de execuções → ok\n[agent.act] act/Agir com syscalls do kernel → ok\n[kernel.write] act/Escrever objetos (pattern + id) → ok\n[kernel.resolve] resolve/Resolver execução → objeto → ok\n[kernel.unmount] resolve/Sair do runtime, persistir em path → ok\n[kernel.cache.put] resolve/Cachear resultado → ok\n",
+    "objectId": null,
+    "createdAt": "2026-08-21T02:50:25.690Z"
+  },
+  "metadata": {
+    "cacheKey": "f0eec295110bc0edfb93353985dfc52644ff259a8ef2ea88e52cfc5e20236312",
+    "runId": "arun_mt2cqkuwzfarvh",
+    "rule": "allow-objects"
+  }
+}
