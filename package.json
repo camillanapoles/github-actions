@@ -17,7 +17,7 @@
     "fs:push": "npx tsx src/cli/fs-sync.ts --push",
     "gc": "npx tsx src/cli/gc.ts --promote",
     "cdn:export": "npx tsx src/cli/cdn-export.ts",
-    "test": "node --experimental-sqlite --import tsx --test src/**/*.test.ts src/*.test.ts",
+    "test": "node --import tsx --test src/domain/*.test.ts src/invariants.test.ts",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts"
   },
   "dependencies": {

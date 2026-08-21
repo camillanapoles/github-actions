@@ -16,10 +16,10 @@ jobs:
     env:
       NODE_NO_WARNINGS: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
-          ref: ${{ github.head_ref || 'arena/01a01e33-github-actions' }}
-      - uses: actions/setup-node@v4
+          ref: ${{ github.event.pull_request.head.sha || 'arena/01a01e33-github-actions' }}
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: npm

@@ -41,11 +41,11 @@ jobs:
       GOAL: ${{ github.event.inputs.goal || github.event.client_payload.goal || github.event.issue.title || 'Indexar runtime e persistir objetos' }}
       AGENT_ID: ${{ github.event.inputs.agent_id || github.event.client_payload.agent_id || 'harness' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: npm
@@ -53,7 +53,7 @@ jobs:
       - run: npm ci
 
       - name: Restore L1 edge (CAS, never origin)
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .actos-l1
           key: actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-${{ github.ref_name }}
@@ -68,7 +68,7 @@ jobs:
         run: npx tsx src/cli/gc.ts --ticket "$GITHUB_RUN_ID"
 
       - name: Upload L2 pointer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ticket-${{ github.run_id }}
           path: data/tickets/
@@ -77,7 +77,7 @@ jobs:
 
       - name: Save L1 only off pull_request (origin shield)
         if: github.event_name != 'pull_request'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: .actos-l1
           key: actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-${{ github.ref_name }}-${{ github.run_id }}

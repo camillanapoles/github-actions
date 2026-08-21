@@ -28,10 +28,10 @@ jobs:
       contents: write
       actions: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: npm
@@ -40,7 +40,7 @@ jobs:
         env:
           SOURCE_RUN: ${{ github.event.workflow_run.id || github.event.inputs.run_id || github.run_id }}
         run: npx tsx src/cli/gc.ts --ticket "$SOURCE_RUN"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: ticket-${{ github.run_id }}
           path: data/tickets/

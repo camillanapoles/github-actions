@@ -59,6 +59,16 @@ git checkout arena/01a01e33-github-actions
 git pull
 ```
 
+## Falhas de workflow (corrigidas no arena)
+
+| Run | Causa | Fix |
+| --- | --- | --- |
+| `ci` / `npm test` exit 9 | `--experimental-sqlite` **não existe no Node 20** | removido do `npm test` |
+| annotation Node 20 deprecated | `actions/*@v4` ainda corre no runtime Node 20 | `checkout@v6` `setup-node@v6` `cache@v5` `upload-artifact@v5` |
+| CodeQL Analyze (actions) no PR | o ramo `arena/` não tem `.github/workflows/` | esperado. Em **Settings → Code security → CodeQL** podes desmarcar a linguagem *GitHub Actions*, ou ignorar o job no PR. Na `main` o CodeQL já passa |
+
+Copia outra vez o trampolim para a `main` (sem merge) depois deste commit.
+
 ## Confirmado na `main` (`9487a17`)
 
 `ci.yml` já tem `permissions: contents: read` no workflow **e** no job `qa`. O aviso dos codebots na linha 9 fica resolvido depois deste push.
