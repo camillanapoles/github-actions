@@ -123,12 +123,16 @@ export function db(): DbLike {
   if (globalThis.__actosDb) return globalThis.__actosDb;
   fs.mkdirSync(dataDir(), { recursive: true });
   let instance: DbLike;
-  try {
-    // Node 22+: experimental. Node 20 (Actions default / gh-aw engines) has no node:sqlite.
-    const { DatabaseSync } = require("node:sqlite") as { DatabaseSync: new (p: string) => DbLike };
-    instance = new DatabaseSync(dbPath());
-  } catch {
+  if (process.env.ACTOS_FILEDB === "1") {
     instance = new FileDb(dbPath() + ".json");
+  } else {
+    try {
+      // Node 22+: experimental. Node 20 (Actions default / gh-aw engines) has no node:sqlite.
+      const { DatabaseSync } = require("node:sqlite") as { DatabaseSync: new (p: string) => DbLike };
+      instance = new DatabaseSync(dbPath());
+    } catch {
+      instance = new FileDb(dbPath() + ".json");
+    }
   }
   instance.exec(SCHEMA);
   instance.exec("INSERT OR IGNORE INTO runtime_space (id, processes, updated_at) VALUES ('kernel', '[]', datetime('now'))");

@@ -30,8 +30,8 @@ function main() {
     }
     return;
   }
-  if (has("promote")) {
-    const r = k.promoteCdn();
+  if (has("promote") || has("sync")) {
+    const r = k.promoteCdn({ all: has("sync") });
     console.log("[cdn] gc", r);
     return;
   }

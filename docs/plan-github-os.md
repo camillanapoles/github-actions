@@ -170,7 +170,11 @@ Audit + este plano. PR aberto. Sem merge.
 
 Entrega: HIT real no mesmo goal; page async inalterada.
 
-### F2 — Git como L3 (o FS) — **feito** neste ramo (local; push opcional)
+### F2 — Git como L3 (o FS) — **parcial** (ramo existe; vivo só após E7)
+
+Ver [`EVOLUCOES.md`](./EVOLUCOES.md): 14 ahead / 5 behind é facto. Ahead tem de **crescer**. Behind tem de **manter-se**.
+
+### F2 (código) — Git como L3
 
 Inspiração Puter: LL provider separado do inode. Ver [`puter-insights.md`](./puter-insights.md).
 

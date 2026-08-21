@@ -90,31 +90,57 @@ export class Kernel {
     return { stats: cdnStats(), l1: l1List(), l2: l2List() };
   }
 
-  lookup(p: string): { layer: "L1" | "L3-sqlite" | "miss"; path: string; body?: unknown } {
+  lookup(p: string): { layer: "L1" | "L3-sqlite" | "L3-git" | "miss"; path: string; body?: unknown } {
     this.ensureSeeded();
     const edge = l1GetByPath(p);
     if (edge) return { layer: "L1", path: p, body: edge.body };
     const obj = objects.byPath(p);
     if (obj) return { layer: "L3-sqlite", path: p, body: obj.payload };
+    if (process.env.ACTOS_GITFS !== "0") {
+      try {
+        const body = gitfs().read(p);
+        if (body != null) return { layer: "L3-git", path: p, body };
+      } catch {
+        /* origin unread */
+      }
+    }
     return { layer: "miss", path: p };
   }
 
-  promoteCdn() {
+  promoteCdn(opts?: { all?: boolean }) {
     this.ensureSeeded();
-    const { evicted, promote } = cdnGc();
+    const { evicted, promote } = opts?.all ? { evicted: [] as string[], promote: l1List() } : cdnGc();
     let promoted = 0;
+    const errors: string[] = [];
     for (const e of promote) {
       const hit = l1GetByPath(e.path);
       if (!hit) continue;
       try {
         gitfs().write(e.path, hit.body, `promote L1→L3 ${e.sha.slice(0, 12)}`);
         promoted += 1;
-      } catch {
-        /* origin optional */
+      } catch (err) {
+        errors.push(String(err));
       }
     }
-    this.journal("cdn.gc", null, { evicted: evicted.length, promoted });
-    return { evicted: evicted.length, promoted };
+    const proc = this.writeProcStat({ evicted: evicted.length, promoted, errors });
+    this.journal("cdn.gc", proc, { evicted: evicted.length, promoted, errors });
+    return { evicted: evicted.length, promoted, errors, proc };
+  }
+
+  writeProcStat(extra: Record<string, unknown> = {}): string | null {
+    const payload = {
+      ...this.stats(),
+      extra,
+      at: nowIso(),
+    };
+    if (process.env.ACTOS_GITFS === "0") return null;
+    try {
+      gitfs().write("/proc/stat", payload, "write /proc/stat");
+      return "/proc/stat";
+    } catch (err) {
+      this.journal("gitfs.proc.error", "/proc/stat", { error: String(err) });
+      return null;
+    }
   }
 
   gitStatus() {
@@ -363,6 +389,20 @@ export class Kernel {
       payload: { processes, at: nowIso() },
       metadata: { n: processes.length },
     });
+  }
+
+  /** F4 slice: persist checkpoint + IRQ actos.slice (continuação ≠ processo vivo). */
+  checkpoint(runId: string, goal?: string) {
+    const live = this.ps().find((p) => p.runId === runId || p.pid === runId);
+    const snap = this.snapshotRuntime();
+    const irq = emitIrq({
+      type: "actos.slice",
+      runId,
+      goal: goal ?? "continue after checkpoint",
+      agentId: "harness",
+    });
+    this.journal("checkpoint", snap.path, { runId, irq: irq.id, live: Boolean(live) });
+    return { snapshot: snap, irq, live: live ?? null };
   }
 
   private reap() {
@@ -677,8 +717,8 @@ export class Kernel {
     if (process.env.ACTOS_GITFS !== "0") {
       try {
         gitfs().write(obj.path, body);
-      } catch {
-        /* L3 origin is best-effort until git is available */
+      } catch (err) {
+        this.journal("gitfs.write.error", obj.path, { error: String(err) });
       }
     }
     try {

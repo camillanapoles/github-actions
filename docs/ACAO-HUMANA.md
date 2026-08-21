@@ -38,7 +38,7 @@ git checkout arena/01a01e33-github-actions
 
 Os YAML em `main` fazem `actions/checkout` **do ramo arena**. Assim o runner usa o código da sessão **sem** misturares o VFS `actos/fs` nem fechares o PR.
 
-Trampolim actualizado: **Node 20** + `NODE_NO_WARNINGS=1` (o warning vinha do `node:sqlite` experimental no 22). Volta a copiar `harness/bootstrap-main/*.yml` para `.github/workflows/` se já tinhas a versão antiga.
+Trampolim **E7**: `git fetch origin refs/heads/actos/fs:refs/heads/actos/fs` antes do CPU/GC; push L3 **sem** `continue-on-error`; `gc --sync` escreve `/proc/stat`. Sem esta cópia o disco continua congelado em 14/5.
 
 ### Pela UI do GitHub (se não quiseres git local)
 

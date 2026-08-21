@@ -45,6 +45,9 @@ jobs:
           ref: ${{ github.event.inputs.code_ref || github.event.client_payload.code_ref || 'arena/01a01e33-github-actions' }}
           fetch-depth: 0
 
+      - name: Attach L3 origin (actos/fs)
+        run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
+
       - uses: actions/setup-node@v6
         with:
           node-version: "20"
@@ -79,3 +82,7 @@ jobs:
         with:
           path: .actos-l1
           key: actos-l1-${{ github.ref_name }}-${{ github.run_id }}
+
+      - name: Push L3 origin (actos/fs)
+        if: github.event_name != 'pull_request'
+        run: npx tsx src/cli/fs-sync.ts --push

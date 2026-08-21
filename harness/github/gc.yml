@@ -27,6 +27,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Attach L3 origin (actos/fs)
+        run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
+
       - uses: actions/setup-node@v6
         with:
           node-version: "20"
@@ -42,9 +45,8 @@ jobs:
           restore-keys: |
             actos-l1-
 
-      - name: Promote hot L1 → L3, evict cold
-        run: npx tsx src/cli/gc.ts --promote
+      - name: Promote L1 → L3 + /proc/stat
+        run: npx tsx src/cli/gc.ts --sync
 
       - name: Push origin disk
         run: npx tsx src/cli/fs-sync.ts --push
-        continue-on-error: true

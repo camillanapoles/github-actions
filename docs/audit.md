@@ -1,61 +1,52 @@
-# Audit de arquitetura — ACTOS
+# Audit de arquitectura — ACTOS
 
-Data: 2026-08-20 · tag: `arena-agent` · ramo: `arena/01a01e33-github-actions`
+Data: 2026-08-21 · tag: `arena-agent` · ramo: `arena/01a01e33-github-actions`
 
 ## Veredito
 
-O **modelo mental está certo**. A engenharia actual é um **protótipo fiel do analog OS**, não ainda um kernel. Como arquitectura de produto/ensino, valida. Como sistema que outro repo possa montar em produção, ainda é um **simulacro com contratos bons**.
+O **modelo mental está certo**. A engenharia local ilustra o analog. No metal GitHub, até E7, o disco **não era origem viva**: `actos/fs` ficou 14/5 e congelado no smoke F2.
 
 Invariante:
 
-> Action escreve → runtime (espaço único) → resolve → objeto em `pattern+id` → regras → page async lê a DB.
+> Action escreve → runtime (espaço único) → resolve → objeto em `pattern+id` → regras → page async lê a projecção. L3 = `refs/heads/actos/fs`.
 
-O código **ilustra** o desenho; em vários pontos **não o cumpre**. O plano para o cumprir de verdade, usando o GitHub como metal, está em [`plan-github-os.md`](./plan-github-os.md).
+## Facto git (não é opinião)
 
----
+`main` tem 5 commits. `actos/fs` tem 14 órfãos. Sem merge-base. Compare = 14 ahead, 5 behind.  
+Ahead **deve crescer** (append). Behind **deve manter-se** (nunca misturar código). Ahead parado = kernel a escrever noutro sítio.
 
 ## O que a engenharia acertou
 
-1. **Um ciclo de vida, não um CRUD.** `queued → in_runtime → resolved → cached`. `resolveExecution` é o `fsync`.
-2. **Path como inode.** `ObjectPath` + `PATTERNS` — identidade derivada, não “em que tabela?”.
-3. **Regras depois do path.** chmod/LSM. Transform no *read path* (não corromper o disco).
-4. **Agente = programa.** YAML + o mesmo CLI que a Action. UI só dispara goal.
-5. **Dois discos.** SQLite = inode table. `data/objects/**.json` = blob (artifact analog).
-6. **Page async.** RSC lê a base. O cliente não é fonte de verdade.
+1. Ciclo `queued → in_runtime → resolved → cached`. `resolveExecution` é o fsync local.
+2. Path como inode (`pattern+id`).
+3. Regras no read path.
+4. Agente = CLI = o que a Action corre.
+5. CAS `sha256` (F1). Sem SHA aleatório.
+6. HTTP enqueue / CLI execute (F1/F4).
+7. FileDb quando não há `node:sqlite` (Node 20).
 
----
+## Onde o analog partia (corrigido em E7 ou ainda aberto)
 
-## Onde o analog parte
+| Peça | Promessa | Antes de E7 | Agora |
+| --- | --- | --- | --- |
+| `actos/fs` | origin vivo | smoke 02:50, 13 files | attach+`/proc/stat`+push honesto |
+| `ensure()` | um só órfão | mintava outro no runner | fetch origin primeiro |
+| `ls` | tree do ramo | worktree `.actos-fs` | `ls-tree` |
+| lookup | L1→L2→L3→L4 | L1 + SQLite | + `L3-git` |
+| GC | promote L1→L3 | 5d + push mascarado | `--sync` + push falha alto |
+| FileDb | Node 20 = CI | `status='queued'` ignorado | literais filtrados; testes forçam FileDb |
+| CPU GitHub | agent-harness | 0 runs | precisa E8/E9 (humano) |
+| Pages | L4 | README da `main` | E12 humano |
+| tags CAS | `actos/obj/{sha}` | inexistentes | E14 |
+| hydrate | SQLite = projecção | SQLite ainda é fonte da UI | E15 |
 
-| Peça | Promessa | Código |
-| --- | --- | --- |
-| Runtime “RAM” | efémero | JSON numa row SQLite; seed deixa `in_runtime` eterno |
-| Cache | hit se o trabalho for o mesmo | `cacheKey` inclui SHA aleatório → HIT quase morto |
-| Harness | `needs`, falha, jobs | loop linear; step nunca falha; `plan()` é `includes("cache")` |
-| `fork` | lineage | dois `nid()` — path não aponta para o pid |
-| Kernel | syscall table fina | God object |
-| GitHub Action | o agente corre no runner | YAML em `harness/github/`, **não** em `.github/workflows/` |
-| Execução | uma verdade | 3 cópias (tabela + object + cache) |
-| Syscall log | anel (dmesg) | append infinito |
-| Agente HTTP | job serverless | `runAgent` síncrono no request |
+## Dívida que fica
 
----
+- Sem YAML na `arena/` (App sem `workflows`) → CodeQL actions no PR falha.
+- Sem `ACTOS_DISPATCH_TOKEN` o HTTP local não dispara o runner.
+- Job 6h slice: `checkpoint()` existe; o trampolim ainda não escuta `actos.slice`.
+- Kernel continua god object. Não é o corte agora.
 
-## Dívida (porquê assim)
+## O que não optimizar
 
-Slice vertical para **provar o caso**. Custo: fonte de verdade espalhada, sem journal. `write` grava DB + ficheiro + syscall. Crash a meio = inode e blob dessincronizados.
-
-O agente “IA” é um **roteiro determinístico**. Honesto como harness; não é agente. LLM só depois de job queue + CAS.
-
-A sessão Arena (banner, label) é **política de operador**, não do kernel. Separar.
-
----
-
-## O que não otimizar agora
-
-- Trocar Next.
-- LLM no harness.
-- Postgres.
-- Microserviços Runtime vs Cache.
-
-Próximo corte de engenharia: **journal + CAS + job assíncrono**, e o GitHub como FS — ver o plano.
+- Trocar Next. LLM no harness. Postgres. Microserviços.

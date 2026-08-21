@@ -8,14 +8,15 @@ export default async function DiscoPage() {
 
   return (
     <div>
-      <Title sub="F2 — L3 origin. Como o Puter: o path é o API; o blob é UUID/SHA no provider. Aqui o provider é git (ramo actos/fs), sem checkout da sessão Arena. SQLite continua a ser o inode / projecção da UI.">
+      <Title sub="L3 origin = refs/heads/actos/fs (órfão). 14 ahead / 5 behind da main é o facto correcto: o disco não leva código. Head tem de avançar (append). ls é ls-tree, não o worktree da sessão.">
         Disco · actos/fs
       </Title>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <Card className="px-4 py-4">
-          <div className="font-mono text-[10px] uppercase tracking-widest text-mute">head</div>
-          <div className="mt-2 break-all font-mono text-xs text-object">{st.head ?? "— (ainda vazio)"}</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-mute">head local / origin</div>
+          <div className="mt-2 break-all font-mono text-xs text-object">{st.head?.slice(0, 12) ?? "—"}</div>
+          <div className="mt-1 break-all font-mono text-[10px] text-mute">{st.remoteHead?.slice(0, 12) ?? "sem origin"}</div>
         </Card>
         <Card className="px-4 py-4">
           <div className="font-mono text-[10px] uppercase tracking-widest text-mute">inodes no tree</div>

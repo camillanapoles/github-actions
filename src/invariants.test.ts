@@ -60,6 +60,15 @@ test("sucesso: lookup L1 depois de write", () => {
   assert.equal(hit.layer, "L1");
 });
 
+test("sucesso F4: checkpoint emite IRQ actos.slice", () => {
+  const k = getKernel();
+  const q = k.enqueueAgent("qa checkpoint slice");
+  const ck = k.checkpoint(q.id, "continue qa");
+  assert.equal(ck.irq.type, "actos.slice");
+  assert.equal(ck.snapshot.kind, "snapshot");
+  assert.match(ck.snapshot.path, /^\/objects\/snapshot\//);
+});
+
 test("sucesso F6: ingest isola dois repos", () => {
   const k = getKernel();
   const a = k.ingest({ repo: "acme/shop", kind: "execution", payload: { n: 1 }, id: "same" });

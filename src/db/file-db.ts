@@ -154,6 +154,12 @@ export class FileDb {
       const val = args[ai++];
       rows = rows.filter((r) => String(r[col]) === String(val));
     }
+    for (const m of sql.matchAll(/(\w+)\s*=\s*'([^']*)'/g)) {
+      if (m[1] === "1") continue;
+      const col = m[1];
+      const val = m[2];
+      rows = rows.filter((r) => String(r[col]) === val);
+    }
     for (const m of likes) {
       const col = m[1];
       const val = String(args[ai++] ?? "").replace(/%/g, "");

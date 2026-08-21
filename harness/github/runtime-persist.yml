@@ -48,4 +48,3 @@ jobs:
       - name: Push L3 if origin allowed
         if: github.event_name != 'pull_request'
         run: npx tsx src/cli/fs-sync.ts --push
-        continue-on-error: true
