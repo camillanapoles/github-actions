@@ -22,6 +22,9 @@ Plano canónico: [`plan-github-os.md`](./plan-github-os.md).
    3. **Captura:** `git fetch` + `gh run list` + `ls-remote` + compare `main`/`actos/fs`.
    4. Lê o resultado. Sucesso → `[sucesso sem debito]`. Erro → subitem ERRO. **Continua** o que ainda for teu.
    5. Não encerres o turno só porque enviaste um comando ao humano.
+9. **Skill `/loop`** ([`harness/skills/loop.md`](../harness/skills/loop.md)):
+   depois de `git push && git log`, corre `scripts/loop-action.sh` —
+   **while a cada 15s** até o workflow desse SHA devolver. RETURN → marca AHEAD → **actividade seguinte**. Não pares.
 
 Marcador canónico de fecho: ``[sucesso sem debito]``.
 
@@ -43,8 +46,10 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 - [ ] E11 CodeQL *actions* no PR (falha esperada sem YAML no arena)
 - [ ] E12 Pages → `.actos-cdn` / `actos/cdn` (não `main` `/`)
 - [ ] E14b ruleset anti force-push em `actos/fs`
-- [x] E16 CI `d9a9ede` run `32532487502` **success** — `[sucesso sem debito]`
+- [x] E16 CI `d9a9ede` / `0442cac` verde — `[sucesso sem debito]`
 - [ ] E17 push tags `actos/obj/*` no origin
+- [ ] E12b trampolim `cdn-pages.yml` na `main` (humano copiar)
+- [x] Skill `/loop` (15s while) — nesta entrega
 
 ---
 
@@ -75,7 +80,9 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `5acc6bd` | arena | AHEAD + E13 slice + E14 CAS tag + E15 hydrate |
 | `0c7060e` | arena | AHEAD ledger SHA |
 | `8a231b3` | main | feat: actos.slice on agent-harness (humano E8b) |
-| *este commit* | arena | injecção sleep→captura→continua + E8b marcado |
+| `d9a9ede` | arena | injecção sleep→captura→continua + E8b |
+| `0442cac` | arena | captura CI verde; E9 dispatch 403 |
+| *este commit* | arena | skill /loop 15s + trampolim cdn-pages |
 
 `actos/fs` vs `main`: ahead cresce; behind cresce quando a `main` ganha trampolim. Behind correcto.
 
@@ -83,11 +90,13 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 ## Próxima actividade
 
-E8b já está na `main` (`8a231b3`). Falta o CPU e as settings.
+Agente: `git push && git log` → `/loop` 15s → se CI verde, CPU local (hydrate + agent + fs-sync --push) para o disco não ficar congelado.
 
-1. **E10** Repo → Settings → Actions → General → Workflow permissions = **Read and write** → Save.
-2. **E9** Actions → **agent-harness** → Run workflow → goal `smoke cpu github`.
-3. **E14b** Settings → Rules → New: nome `actos-fs-append-only`, target branch `actos/fs`, Block force pushes + Restrict deletions.
-4. Agente neste turno: depois desta mensagem, `sleep` → `scripts/verify-metal.sh` → marca E9/E16 se o metal tiver corrido.
+Humano (paralelo):
+
+1. **E10** Settings → Actions → General → **Read and write**.
+2. **E9** Actions → **agent-harness** → Run → `smoke cpu github`.
+3. **E12b** copiar `harness/bootstrap-main/cdn-pages.yml` → `.github/workflows/` na `main`.
+4. **E14b** ruleset `actos-fs-append-only` (block force-push + delete).
 
 Não merge. Não force-push `actos/fs`. Não apagar `arena/…`.

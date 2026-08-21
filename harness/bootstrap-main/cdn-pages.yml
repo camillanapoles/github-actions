@@ -1,0 +1,51 @@
+# Trampolim L4. Copia para .github/workflows/ na main (humano).
+# Exporta .actos-cdn a partir do kernel no arena + L3 actos/fs.
+# Pages: Settings → Pages → Source = GitHub Actions.
+
+name: actos-cdn
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [agent-harness, actos-gc]
+    types: [completed]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: actos-cdn
+  cancel-in-progress: false
+
+jobs:
+  export:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      NODE_NO_WARNINGS: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: arena/01a01e33-github-actions
+          fetch-depth: 0
+      - name: Attach L3 origin (actos/fs)
+        run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Hydrate L3 → export CDN
+        run: |
+          npx tsx src/cli/fs-sync.ts --hydrate
+          npm run cdn:export
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .actos-cdn
+      - id: deploy
+        uses: actions/deploy-pages@v4
