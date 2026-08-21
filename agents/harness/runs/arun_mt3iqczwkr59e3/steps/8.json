@@ -1,0 +1,24 @@
+{
+  "id": "arun_mt3iqczwkr59e3_s8",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/8",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 8,
+    "name": "resolve/Sair do runtime, persistir em path",
+    "uses": "kernel.unmount",
+    "status": "ok",
+    "input": {
+      "goal": "smoke cpu github",
+      "with": {}
+    },
+    "output": {
+      "unmounted": "arun_mt3iqczwkr59e3"
+    },
+    "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/8",
+    "at": "2026-08-21T22:25:59.481Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
