@@ -1,25 +1,37 @@
 {
   "runtime": {
     "processes": 0,
-    "updatedAt": "2026-08-21T22:05:51.189Z"
+    "updatedAt": "2026-08-21T22:26:00.950Z"
   },
   "executions": {
     "byStatus": {
-      "cached": 11,
+      "cached": 12,
       "failed": 1
     },
     "cacheHits": 8,
-    "total": 12
+    "total": 13
   },
-  "objects": 26,
+  "objects": 52,
   "kinds": [
     {
+      "kind": "agent-step",
+      "count": 18
+    },
+    {
       "kind": "cache",
-      "count": 12
+      "count": 14
     },
     {
       "kind": "execution",
-      "count": 12
+      "count": 14
+    },
+    {
+      "kind": "agent-run",
+      "count": 2
+    },
+    {
+      "kind": "goal-result",
+      "count": 2
     },
     {
       "kind": "manifest",
@@ -34,26 +46,41 @@
   "rules": 6,
   "queue": 0,
   "gitfs": {
-    "head": "103eab9fad8b45148798ea5173c880b5b8c1ca31",
-    "files": 13,
+    "head": "32339b355e12f1dbfc2ed3eafe5a17f310e50987",
+    "files": 27,
     "runtimeRefs": [],
     "workTree": "/home/user/github-actions/.actos-fs",
     "attached": true,
-    "remoteHead": "103eab9fad8b45148798ea5173c880b5b8c1ca31"
+    "remoteHead": "cfc7c496b9d233caaa187c2f19cdbd535f1f9f0e",
+    "casTags": [
+      "refs/tags/actos/obj/04b3c5e18726dd85ea305c7a38fc29b985b324d7414ddb74f6489b1f793d4b62",
+      "refs/tags/actos/obj/19d520b2419f06febee152588f7f66750cf4d3680005833208d7ca701bdf97b5",
+      "refs/tags/actos/obj/1bef0f3df1660664ad1816bebe1adc571113dcec663ce3e6ac392ec24d110e5c",
+      "refs/tags/actos/obj/4367d538f32434d2d1c62e839e7ace5c522510b7c78b0e59d4e6eace4b3c0409",
+      "refs/tags/actos/obj/62831300e4dfb917fc912362acff61efe853764f52258102f9f093a3cb0bec44",
+      "refs/tags/actos/obj/63dc5e637d89ce7f1b9bd33b7214b3493553c611ca0bd5faa3f9f31bdb8168b9",
+      "refs/tags/actos/obj/9220f925990967f228b9a4244598e380741db166234406cccd7863235dc32247",
+      "refs/tags/actos/obj/94157e69a3bd430f08fa169abc792473f9ce43ed6e6be804614d5a1a66c62527",
+      "refs/tags/actos/obj/a1f738421ca498de7fa92ee511eb67770f990fa6dec6043038bcca3e7b2cf07a",
+      "refs/tags/actos/obj/a3d861c0e2d0416355607ef9c06acab8d869f32dbab116a746d5c0e1e48d8fab",
+      "refs/tags/actos/obj/af37e0311f8bf85a5e03e6a84a39b44055c2fb5ccb690bed636c57ae947121ae",
+      "refs/tags/actos/obj/dad0ad0e11aa73025ae145ce35f766b722f9ec7276450debc782cd67656a0244",
+      "refs/tags/actos/obj/ee93680dfe7080b7d1981f760af342b8cd9f1f015f939439edba15a8ae7d63a8"
+    ]
   },
   "cdn": {
     "l1": {
-      "entries": 0,
-      "bytes": 0,
-      "hits": 0
+      "entries": 14,
+      "bytes": 17449,
+      "hits": 14
     },
     "l2": {
-      "tickets": 0
+      "tickets": 1
     },
     "ttlMs": 604800000
   },
   "extra": {
     "reason": "fs-sync --push"
   },
-  "at": "2026-08-21T22:05:51.600Z"
+  "at": "2026-08-21T22:26:01.254Z"
 }
