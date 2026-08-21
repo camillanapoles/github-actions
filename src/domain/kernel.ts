@@ -623,7 +623,11 @@ export class Kernel {
     agents.setStatus(agent.id, "planning");
     agentRuns.upsert({ ...run, status: "planning" });
 
-    if (process.env.ACTOS_SLICE_FORCE === "1") {
+    const t0 = Date.now();
+    const budget = Number(process.env.ACTOS_SLICE_BUDGET_MS ?? "0");
+    const sliceNow =
+      process.env.ACTOS_SLICE_FORCE === "1" || (Number.isFinite(budget) && budget > 0 && Date.now() - t0 >= budget);
+    if (sliceNow) {
       const ck = this.checkpoint(runId, run.goal);
       const sliced: AgentRunRecord = {
         ...run,

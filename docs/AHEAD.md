@@ -16,6 +16,12 @@ Plano canónico: [`plan-github-os.md`](./plan-github-os.md).
    - **próxima actividade** (1 bloco, executável)
 6. Não merges PR #1 até o humano dizer `merge` / `fim` / `fechar` / `encerrar`.
 7. Ahead do `actos/fs` **tem de crescer** (append). Behind da `main` **mantém-se**.
+8. **Actividade → sleep → captura → continuidade** (não pares à espera do próximo turno):
+   1. Escreve a actividade humana no bloco *Próxima actividade* e na resposta.
+   2. `sleep` de verificação (≥ 90s; se o metal estiver a correr job, espera o run).
+   3. **Captura:** `git fetch` + `gh run list` + `ls-remote` + compare `main`/`actos/fs`.
+   4. Lê o resultado. Sucesso → `[sucesso sem debito]`. Erro → subitem ERRO. **Continua** o que ainda for teu.
+   5. Não encerres o turno só porque enviaste um comando ao humano.
 
 Marcador canónico de fecho: ``[sucesso sem debito]``.
 
@@ -31,7 +37,7 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 - [x] E13 kernel: `sliced` + IRQ `event_type=actos.slice` + `--slice` — `[sucesso sem debito]`
 - [x] E14 `tagCas` idempotente (testes isolados) — `[sucesso sem debito]`
 - [x] E15 `hydrateFromL3` (testes isolados) — `[sucesso sem debito]`
-- [ ] E8b humano: recopiar trampolim (`actos.slice` no `agent-harness.yml`)
+- [x] E8b trampolim `actos.slice` → `main` `8a231b3` — `[sucesso sem debito]`
 - [ ] E9 humano: Actions → agent-harness → `smoke cpu github`
 - [ ] E10 humano: Settings → Actions → Workflow permissions **Read and write**
 - [ ] E11 CodeQL *actions* no PR (falha esperada sem YAML no arena)
@@ -44,8 +50,8 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 ## Todolist
 
-- [ ] E8b recopiar `harness/bootstrap-main/*.yml` → `.github/workflows/` (slice)
 - [ ] E9 smoke CPU GitHub (0 runs do harness até agora)
+  - [ ] ERRO E9-0: `gh run list --workflow=agent-harness.yml` vazio. Fazer: Run workflow **ou** o agente tenta `gh workflow run`.
 - [ ] E10 write permission (senão E9 push L3 = 403)
 - [ ] E12 Pages L4
 - [ ] E16 confirmar `ci` no PR
@@ -67,16 +73,21 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `cfc7c49` | actos/fs | `/proc/stat` (15º) |
 | `4776383` | arena | E7 attach + FileDb |
 | `5acc6bd` | arena | AHEAD + E13 slice + E14 CAS tag + E15 hydrate |
+| `0c7060e` | arena | AHEAD ledger SHA |
+| `8a231b3` | main | feat: actos.slice on agent-harness (humano E8b) |
+| *este commit* | arena | injecção sleep→captura→continua + E8b marcado |
 
-`actos/fs` vs `main`: ahead = commits de disco; behind = 6 (main cresceu com E8). Behind correcto.
+`actos/fs` vs `main`: ahead cresce; behind cresce quando a `main` ganha trampolim. Behind correcto.
 
 ---
 
 ## Próxima actividade
 
-1. `npm test` + `tsc` desta entrega; push arena; tag `arena-agent`.
-2. Humano (se ainda não): **E9** Run workflow `agent-harness` goal `smoke cpu github`. **E10** Read and write.
-3. Agente no turno seguinte: ler CI do PR (E16); se verde → `[sucesso sem debito]`; se vermelho → subitem ERRO com o log.
-4. Depois: E14b ruleset, E12 árvore `.actos-cdn` pronta a apontar.
+E8b já está na `main` (`8a231b3`). Falta o CPU e as settings.
+
+1. **E10** Repo → Settings → Actions → General → Workflow permissions = **Read and write** → Save.
+2. **E9** Actions → **agent-harness** → Run workflow → goal `smoke cpu github`.
+3. **E14b** Settings → Rules → New: nome `actos-fs-append-only`, target branch `actos/fs`, Block force pushes + Restrict deletions.
+4. Agente neste turno: depois desta mensagem, `sleep` → `scripts/verify-metal.sh` → marca E9/E16 se o metal tiver corrido.
 
 Não merge. Não force-push `actos/fs`. Não apagar `arena/…`.

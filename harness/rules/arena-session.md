@@ -36,3 +36,4 @@ Ler e actualizar [`docs/AHEAD.md`](../../docs/AHEAD.md).
 - Sucesso sem residual → **`[sucesso sem debito]`**
 - Erro → subitem na todolist (`ERRO … → fazer: …`)
 - Cada commit → ledger (SHA) + checklist + próxima actividade
+- Depois de actividade humana: **sleep → captura → leitura → continua** (não esperes o próximo turno)

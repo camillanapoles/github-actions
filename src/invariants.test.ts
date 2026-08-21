@@ -71,6 +71,17 @@ test("sucesso F4: checkpoint emite IRQ actos.slice", () => {
   assert.equal(body.event_type, "actos.slice");
 });
 
+test("sucesso E13: ACTOS_SLICE_BUDGET_MS=1 no arranque não fatia sozinho (harness curto)", async () => {
+  const k = getKernel();
+  process.env.ACTOS_SLICE_BUDGET_MS = "1";
+  try {
+    const r = await k.runAgent("qa budget short " + Date.now());
+    assert.equal(r.status, "done");
+  } finally {
+    delete process.env.ACTOS_SLICE_BUDGET_MS;
+  }
+});
+
 test("sucesso E13: ACTOS_SLICE_FORCE corta o CPU e deixa sliced", async () => {
   const k = getKernel();
   const q = k.enqueueAgent("qa slice force " + Date.now());

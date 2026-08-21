@@ -60,6 +60,10 @@ async function main() {
 
   const goal = arg("goal", process.env.GOAL ?? "Indexar execuções cacheadas e persistir objetos.");
   const agent = arg("agent", process.env.AGENT_ID ?? "harness");
+  if (process.env.ACTOS_GITFS !== "0") {
+    const h = kernel.hydrateFromL3();
+    console.log(`[actos] hydrate L3 n=${h.n}`);
+  }
   console.log(`[actos] unique space processes=${kernel.ps().length}`);
   console.log(`[actos] agent=${agent} goal=${JSON.stringify(goal)}`);
   const run = await kernel.runAgent(goal, agent);

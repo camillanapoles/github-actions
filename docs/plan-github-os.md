@@ -262,3 +262,4 @@ Fonte viva: [`AHEAD.md`](./AHEAD.md). O agente **não** fecha um turno sem actua
 | Erro / parcial / 403 / CI fail | subitem na todolist: `ERRO <id>: … → fazer: …` |
 | Cada commit `[arena-agent]` | ledger + checklist + bloco **próxima actividade** |
 | `actos/fs` | ahead cresce (append); behind da `main` mantém-se |
+| Actividade humana enviada | **sleep → captura (`gh run` / `ls-remote`) → leitura → continuidade**. Não parar o turno. |
