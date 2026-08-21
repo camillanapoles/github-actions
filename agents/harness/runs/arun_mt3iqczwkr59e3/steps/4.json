@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3iqczwkr59e3_s4",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/4",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 4,
+    "name": "act/Consultar cache de execuções",
+    "uses": "kernel.cache.get",
+    "status": "ok",
+    "input": {
+      "goal": "smoke cpu github",
+      "with": {}
+    },
+    "output": {
+      "cacheKey": "49c01dd77b0c3d86607a7f4de67145ae089e2f0a3eff50918cca07c8b7cb04f4",
+      "hit": false
+    },
+    "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/4",
+    "at": "2026-08-21T22:25:59.423Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
