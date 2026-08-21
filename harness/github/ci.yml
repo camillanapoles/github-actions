@@ -5,9 +5,14 @@ on:
     branches: ["**"]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   typecheck:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       NODE_NO_WARNINGS: "1"
     steps:

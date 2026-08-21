@@ -13,6 +13,10 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: write
+  actions: write
+
 concurrency:
   group: actos-fs
   cancel-in-progress: false

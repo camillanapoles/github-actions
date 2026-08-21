@@ -59,6 +59,31 @@ git checkout arena/01a01e33-github-actions
 git pull
 ```
 
+## Codebots: `ci.yml` sem `permissions`
+
+Corrigido em `harness/bootstrap-main/ci.yml`:
+
+```yaml
+permissions:
+  contents: read
+jobs:
+  qa:
+    permissions:
+      contents: read
+```
+
+CI só lê o repo e corre testes — least privilege. Harness/gc pedem `contents: write` + `actions: write` (L3/L1).
+
+Volta a copiar o trampolim para `main` (sem merge):
+
+```bash
+git checkout main && git pull
+git checkout origin/arena/01a01e33-github-actions -- harness/bootstrap-main
+cp harness/bootstrap-main/*.yml .github/workflows/
+git add .github/workflows && git commit -m "fix: explicit permissions on ci.yml" && git push
+git checkout arena/01a01e33-github-actions
+```
+
 ## Smoke do CPU
 
 Actions → **agent-harness** → Run workflow → goal `smoke cpu github`.

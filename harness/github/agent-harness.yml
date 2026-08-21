@@ -22,6 +22,10 @@ on:
   issues:
     types: [opened, labeled]
 
+permissions:
+  contents: write
+  actions: write
+
 concurrency:
   group: actos-cpu-${{ github.ref }}
   cancel-in-progress: false
