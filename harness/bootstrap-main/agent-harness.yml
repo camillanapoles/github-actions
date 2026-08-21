@@ -1,0 +1,76 @@
+# Trampolim na DEFAULT BRANCH.
+# O código vive em arena/… — este ficheiro só acende o CPU no GitHub.
+# NÃO faz merge da sessão.
+
+name: agent-harness
+
+on:
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: Objetivo do agente
+        required: true
+        type: string
+      agent_id:
+        default: harness
+        type: string
+      code_ref:
+        description: Ramo com o kernel (sessão Arena)
+        default: arena/01a01e33-github-actions
+        type: string
+  repository_dispatch:
+    types: [agent.run]
+
+concurrency:
+  group: actos-cpu
+  cancel-in-progress: false
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    env:
+      GOAL: ${{ github.event.inputs.goal || github.event.client_payload.goal || 'Indexar runtime e persistir objetos' }}
+      AGENT_ID: ${{ github.event.inputs.agent_id || github.event.client_payload.agent_id || 'harness' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.code_ref || github.event.client_payload.code_ref || 'arena/01a01e33-github-actions' }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Restore L1 edge
+        uses: actions/cache@v4
+        with:
+          path: .actos-l1
+          key: actos-l1-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            actos-l1-
+
+      - name: CPU
+        run: npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
+
+      - name: L2 ticket
+        run: npx tsx src/cli/gc.ts --ticket "$GITHUB_RUN_ID"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ticket-${{ github.run_id }}
+          path: data/tickets/
+          retention-days: 1
+          if-no-files-found: warn
+
+      - name: Save L1 (not on pull_request)
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/save@v4
+        with:
+          path: .actos-l1
+          key: actos-l1-${{ github.ref_name }}-${{ github.run_id }}
