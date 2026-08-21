@@ -19,21 +19,31 @@ jobs:
     permissions:
       contents: write
       actions: write
+    env:
+      NODE_NO_WARNINGS: "1"
     steps:
       - uses: actions/checkout@v6
         with:
           ref: arena/01a01e33-github-actions
           fetch-depth: 0
+
+      - name: Attach L3 origin (actos/fs)
+        run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
+
       - uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: npm
+
       - run: npm ci
+
       - uses: actions/cache@v5
         with:
           path: .actos-l1
           key: actos-l1-${{ github.run_id }}
           restore-keys: actos-l1-
-      - run: npx tsx src/cli/gc.ts --promote
-      - run: npx tsx src/cli/fs-sync.ts --push
-        continue-on-error: true
+
+      - run: npx tsx src/cli/gc.ts --sync
+
+      - name: Push L3 origin
+        run: npx tsx src/cli/fs-sync.ts --push
