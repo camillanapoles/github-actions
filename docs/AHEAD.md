@@ -66,7 +66,7 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `1f3a249`…`103eab9` | actos/fs | F2 smoke (14) |
 | `cfc7c49` | actos/fs | `/proc/stat` (15º) |
 | `4776383` | arena | E7 attach + FileDb |
-| *este commit* | arena | AHEAD + E13 slice + E14 CAS tag + E15 hydrate |
+| `5acc6bd` | arena | AHEAD + E13 slice + E14 CAS tag + E15 hydrate |
 
 `actos/fs` vs `main`: ahead = commits de disco; behind = 6 (main cresceu com E8). Behind correcto.
 
