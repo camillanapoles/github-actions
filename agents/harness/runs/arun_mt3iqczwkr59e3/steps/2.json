@@ -1,0 +1,31 @@
+{
+  "id": "arun_mt3iqczwkr59e3_s2",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/2",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 2,
+    "name": "plan/Ler memória (objetos permitidos)",
+    "uses": "kernel.ls",
+    "status": "ok",
+    "input": {
+      "goal": "smoke cpu github",
+      "with": {
+        "prefix": "/objects"
+      }
+    },
+    "output": {
+      "objects": 16,
+      "memoryPaths": [
+        "/objects",
+        "/cache",
+        "/runtime"
+      ]
+    },
+    "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/2",
+    "at": "2026-08-21T22:25:59.422Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
