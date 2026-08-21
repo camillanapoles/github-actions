@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt2cqkuwzfarvh_s6",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/6",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 6,
+    "name": "act/Escrever objetos (pattern + id)",
+    "uses": "kernel.write",
+    "status": "ok",
+    "input": {
+      "goal": "F2 gitfs smoke",
+      "with": {}
+    },
+    "output": {
+      "path": "/objects/goal-result/goal_mt2cqkwgbdjosi",
+      "id": "goal_mt2cqkwgbdjosi"
+    },
+    "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/6",
+    "at": "2026-08-21T02:50:25.777Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
