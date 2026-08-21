@@ -1,0 +1,34 @@
+{
+  "id": "goal_mt2cqkwgbdjosi",
+  "kind": "goal-result",
+  "path": "/objects/goal-result/goal_mt2cqkwgbdjosi",
+  "pattern": "/objects/{kind}/{id}",
+  "payload": {
+    "goal": "F2 gitfs smoke",
+    "plan": {
+      "goal": "F2 gitfs smoke",
+      "strategy": "workflow-backed (GitHub Action analog)",
+      "actions": [
+        "kernel.ps",
+        "kernel.write",
+        "kernel.resolve"
+      ]
+    },
+    "act": {
+      "summary": "Goal \"F2 gitfs smoke\" observado no kernel.",
+      "cachedExecutions": 14,
+      "runtimeProcesses": 1,
+      "objectIndex": {
+        "rule-doc": 1,
+        "execution": 14,
+        "goal-result": 2,
+        "manifest": 1
+      }
+    }
+  },
+  "metadata": {
+    "agent": "harness",
+    "runId": "arun_mt2cqkuwzfarvh",
+    "rule": "allow-objects"
+  }
+}
