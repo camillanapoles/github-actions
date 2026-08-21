@@ -10,6 +10,8 @@
     "seed": "npx tsx src/db/seed.ts",
     "agent": "npx tsx src/cli/agent.ts",
     "drain": "npx tsx src/cli/agent.ts --drain",
+    "fs:init": "npx tsx src/cli/fs-sync.ts --init",
+    "fs:push": "npx tsx src/cli/fs-sync.ts --push",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts"
   },
   "dependencies": {

@@ -18,6 +18,7 @@ Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-
 
 - Audit: [`docs/audit.md`](docs/audit.md)
 - Plano (GitHub = FS + memória + CDN): [`docs/plan-github-os.md`](docs/plan-github-os.md)
+- Puter.js → camadas FS: [`docs/puter-insights.md`](docs/puter-insights.md)
 
 ---
 

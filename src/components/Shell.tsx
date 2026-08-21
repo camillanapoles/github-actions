@@ -6,6 +6,7 @@ const NAV = [
   { href: "/runtime", label: "Runtime", k: "02" },
   { href: "/execucoes", label: "Execuções", k: "03" },
   { href: "/objetos", label: "Objetos", k: "04" },
+  { href: "/disco", label: "Disco git", k: "04b" },
   { href: "/agentes", label: "Agentes", k: "05" },
   { href: "/regras", label: "Regras", k: "06" },
   { href: "/sys", label: "Syscalls", k: "07" },

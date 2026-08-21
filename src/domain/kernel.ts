@@ -11,6 +11,7 @@ import {
   syscalls,
 } from "@/db/repo";
 import { cacheKey as casKey } from "./cas";
+import { gitfs } from "./gitfs";
 import { ObjectPath, PATTERNS } from "./path";
 import { RuleEngine } from "./rules";
 import type {
@@ -76,7 +77,18 @@ export class Kernel {
       agents: agents.list().length,
       rules: rules.list().filter((r) => r.enabled).length,
       queue: agentRuns.queued().length,
+      gitfs: gitfs().status(),
     };
+  }
+
+  gitStatus() {
+    this.ensureSeeded();
+    return gitfs().status();
+  }
+
+  gitLs(prefix = "/") {
+    this.ensureSeeded();
+    return gitfs().ls(prefix);
   }
 
   /* ---------- filesystem (objects) ---------- */
@@ -149,6 +161,11 @@ export class Kernel {
     const decision = new RuleEngine(rules.list()).evaluate("write", obj.path, obj);
     if (!decision.allowed) throw new Error(`EACCES: ${decision.reason}`);
     const ok = objects.delete(id);
+    try {
+      gitfs().unlink(obj.path);
+    } catch {
+      /* L3 best-effort */
+    }
     this.journal("unlink", obj.path, { id });
     this.trace("unlink", { id }, { ok }, obj.path);
     return ok;
@@ -254,6 +271,11 @@ export class Kernel {
       expiresAtMs,
     });
     this.journal("mount", proc.path, { pid: proc.pid, ttlMs });
+    try {
+      gitfs().mountRef(proc.pid, proc);
+    } catch {
+      /* refs/actos/runtime optional */
+    }
     return this.ps();
   }
 
@@ -263,6 +285,11 @@ export class Kernel {
       if (p.runId === runId || p.pid === runId) map.delete(pid);
     }
     this.journal("unmount", `/runtime/runs/${runId}`, { runId });
+    try {
+      gitfs().unmountRef(runId);
+    } catch {
+      /* */
+    }
     return this.ps();
   }
 
@@ -564,6 +591,18 @@ export class Kernel {
         2,
       ),
     );
+    try {
+      gitfs().write(obj.path, {
+        id: obj.id,
+        kind: obj.kind,
+        path: obj.path,
+        pattern: obj.pattern,
+        payload: obj.payload,
+        metadata: obj.metadata,
+      });
+    } catch {
+      /* L3 origin is best-effort until git is available */
+    }
   }
 
   private trace(name: string, args: unknown, result: unknown, p: string | null) {
@@ -609,6 +648,7 @@ const SYS: Record<string, (k: Kernel, args: Record<string, unknown>) => unknown>
   "cache.stat": (k) => k.stats().executions,
   snapshot: (k) => k.snapshotRuntime(),
   fork: (k, a) => k.fork(String(a.runId)),
+  "git.status": (k) => k.gitStatus(),
   "path.resolve": (k, a) =>
     k.resolvePath(String(a.pattern ?? PATTERNS.object), (a.params as Record<string, string>) ?? { kind: "blob", id: "x" }),
 };

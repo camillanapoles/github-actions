@@ -10,3 +10,5 @@ data/objects
 .DS_Store
 .env
 .env.local
+.actos-fs/
+.actos-fs-index

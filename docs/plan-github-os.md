@@ -170,15 +170,16 @@ Audit + este plano. PR aberto. Sem merge.
 
 Entrega: HIT real no mesmo goal; page async inalterada.
 
-### F2 — Git como L3 (o FS)
+### F2 — Git como L3 (o FS) — **feito** neste ramo (local; push opcional)
 
-- Orphan `actos/fs` (uma vez): tree vazia `proc/stat.json`.
-- CLI `actos-sync`: `write` → blob + commit na branch `actos/fs` (path = pattern).
-- `git push origin HEAD:refs/actos/runtime/{pid}` no mount; `git push origin :refs/actos/runtime/{pid}` no unmount.
-- `concurrency: actos-fs`. Permissão `contents: write` limitada a estes refs.
-- Page async: `git fetch origin actos/fs` *ou* projecção SQLite alimentada pelo fetch.
+Inspiração Puter: LL provider separado do inode. Ver [`puter-insights.md`](./puter-insights.md).
 
-Entrega: o disco **é** o GitHub. A SQLite é cache da UI.
+- `src/domain/gitfs.ts` — **não** faz checkout (a sessão Arena não sai de `arena/…`). `commit-tree` + `update-ref refs/heads/actos/fs`.
+- Cada `Kernel.write` materializa o path no tree; `mount` cria `refs/actos/runtime/{pid}`; `unmount` apaga a ref.
+- CLI `npx tsx src/cli/fs-sync.ts --init|--push`. UI `/disco`.
+- SQLite = FSEntry (projecção). git = storage UID/SHA.
+
+Entrega: o disco **é** um ramo git. Push para origin quando o remoto aceitar `actos/fs`.
 
 ### F3 — L1/L2 como CDN edge
 
