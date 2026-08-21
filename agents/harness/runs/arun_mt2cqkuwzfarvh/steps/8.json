@@ -1,0 +1,24 @@
+{
+  "id": "arun_mt2cqkuwzfarvh_s8",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/8",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 8,
+    "name": "resolve/Sair do runtime, persistir em path",
+    "uses": "kernel.unmount",
+    "status": "ok",
+    "input": {
+      "goal": "F2 gitfs smoke",
+      "with": {}
+    },
+    "output": {
+      "unmounted": "arun_mt2cqkuwzfarvh"
+    },
+    "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/8",
+    "at": "2026-08-21T02:50:25.777Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
