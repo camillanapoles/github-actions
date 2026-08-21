@@ -43,19 +43,19 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 - [ ] E11 CodeQL *actions* no PR (falha esperada sem YAML no arena)
 - [ ] E12 Pages → `.actos-cdn` / `actos/cdn` (não `main` `/`)
 - [ ] E14b ruleset anti force-push em `actos/fs`
-- [ ] E16 CI do PR #1 verde neste SHA
+- [x] E16 CI `d9a9ede` run `32532487502` **success** — `[sucesso sem debito]`
 - [ ] E17 push tags `actos/obj/*` no origin
 
 ---
 
 ## Todolist
 
-- [ ] E9 smoke CPU GitHub (0 runs do harness até agora)
-  - [ ] ERRO E9-0: `gh run list --workflow=agent-harness.yml` vazio. Fazer: Run workflow **ou** o agente tenta `gh workflow run`.
+- [ ] E9 smoke CPU GitHub (0 runs)
+  - [x] ERRO E9-0 lista vazia — ainda verdade após captura 22:19Z
+  - [ ] ERRO E9-dispatch: `gh workflow run agent-harness.yml` → 403 *Resource not accessible by integration*. Fazer: humano clica **Run workflow**.
 - [ ] E10 write permission (senão E9 push L3 = 403)
 - [ ] E12 Pages L4
-- [ ] E16 confirmar `ci` no PR
-  - [ ] ERRO CI-pre-E7: `npm test` exit 1 no Node 20 (FileDb `status='queued'`). Mitigado em E7 + trampolim `38e6393`. **Validar no próximo run.**
+- [x] E16 CI FileDb no Node 20 — `[sucesso sem debito]` run 32532487502
   - [ ] ERRO CodeQL-actions: *no source code seen* no PR. Sem YAML no arena. Não é regressão.
 - [ ] E14b ruleset
   - [ ] ERRO E14b: `gh api .../rulesets` → 403 *Resource not accessible by integration*. Fazer: humano cria ruleset `actos-fs-append-only` (block force-push + deletion em `actos/fs`).
