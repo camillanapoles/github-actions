@@ -1,0 +1,75 @@
+{
+  "id": "cache_49c01dd77b0c3d86",
+  "kind": "cache",
+  "path": "/cache/agent-harness.yml/49c01dd77b0c3d86607a7f4de67145ae089e2f0a/49c01dd77b0c3d86",
+  "pattern": "/cache/{workflow}/{sha}/{id}",
+  "payload": {
+    "hit": true,
+    "executionId": "ex_mt3iqczwo77a36",
+    "workflow": "agent-harness.yml",
+    "sha": "49c01dd77b0c3d86607a7f4de67145ae089e2f0a",
+    "cacheKey": "49c01dd77b0c3d86607a7f4de67145ae089e2f0a3eff50918cca07c8b7cb04f4",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": "harness",
+        "name": "agentic-harness",
+        "status": "completed",
+        "startedAt": "2026-08-21T22:25:59.382Z",
+        "steps": [
+          {
+            "name": "plan/Inspecionar espaço único",
+            "conclusion": "success",
+            "durationMs": 19
+          },
+          {
+            "name": "plan/Ler memória (objetos permitidos)",
+            "conclusion": "success",
+            "durationMs": 26
+          },
+          {
+            "name": "plan/Planejar a partir do goal",
+            "conclusion": "success",
+            "durationMs": 33
+          },
+          {
+            "name": "act/Consultar cache de execuções",
+            "conclusion": "success",
+            "durationMs": 40
+          },
+          {
+            "name": "act/Agir com syscalls do kernel",
+            "conclusion": "success",
+            "durationMs": 47
+          },
+          {
+            "name": "act/Escrever objetos (pattern + id)",
+            "conclusion": "success",
+            "durationMs": 54
+          },
+          {
+            "name": "resolve/Resolver execução → objeto",
+            "conclusion": "success",
+            "durationMs": 61
+          },
+          {
+            "name": "resolve/Sair do runtime, persistir em path",
+            "conclusion": "success",
+            "durationMs": 68
+          },
+          {
+            "name": "resolve/Cachear resultado",
+            "conclusion": "success",
+            "durationMs": 75
+          }
+        ],
+        "conclusion": "success",
+        "finishedAt": "2026-08-21T22:25:59.981Z"
+      }
+    ]
+  },
+  "metadata": {
+    "source": "resolveExecution",
+    "rule": null
+  }
+}
