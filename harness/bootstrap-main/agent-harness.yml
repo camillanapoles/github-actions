@@ -21,6 +21,10 @@ on:
   repository_dispatch:
     types: [agent.run]
 
+permissions:
+  contents: write
+  actions: write
+
 concurrency:
   group: actos-cpu
   cancel-in-progress: false
