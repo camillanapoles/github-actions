@@ -55,6 +55,16 @@ Os YAML em `main` fazem `actions/checkout` **do ramo arena**. Assim o runner usa
 
 Se o job falhar em `checkout` do arena, confirma que o ramo ainda existe (não apagaste).
 
+## Mais tarde (F5 Pages) — opcional, também tua
+
+Quando quiseres o edge público no GitHub:
+
+1. Corre `npm run cdn:export` no ramo arena (gera `.actos-cdn/`).
+2. Em **Settings → Pages** aponta para um ramo `actos/cdn` **ou** espera o merge.
+3. Não uses `main` como VFS. Pages = só a árvore já redactada.
+
+Até lá `/publico` na UI local já é o CDN.
+
 ## Depois
 
 Volta a esta sessão e diz **continua** / **prossiga**. Eu sigo F5 (Pages/CDN público) no `arena/`.  

@@ -207,13 +207,12 @@ Ainda falta copiar YAML para `.github/workflows/` na default branch (token sem `
 
 Entrega: o request HTTP não é o processo. O runner é.
 
-### F5 — CDN público + regras
+### F5 — CDN público + regras — **feito** (árvore local; Pages é acção humana)
 
-- `actos/cdn` ou Pages a partir de `actos/fs` filtrado (só kinds públicos, transform redact).
-- URL imutável: `/obj/{sha256}` e URL estável `/objects/{kind}/{id}` (último tag).
-- Purge = rebuild Pages (barato, tree já está no git).
-
-Entrega: a “page async” pode ser estática no edge para objectos já resolvidos.
+- `src/domain/public-cdn.ts` — deny some, redact secrets, skip `/runtime` `/sys` `/agents`.
+- URLs: imutável `obj/{sha}.json` + estável `{path}.json`. Purge = reexport.
+- CLI `npm run cdn:export`, UI `/publico`, `GET /api/publico`.
+- GitHub Pages na `main` continua a ser a tua acção (igual aos workflows) — ver `docs/ACAO-HUMANA.md`.
 
 ### F6 — multi-repo (Nível C do README)
 

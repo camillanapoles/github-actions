@@ -12,6 +12,7 @@ import {
 } from "@/db/repo";
 import { cacheKey as casKey } from "./cas";
 import { emitIrq, githubDispatchBody, pendingIrqs } from "./irq";
+import { publishObjects, publicDir } from "./public-cdn";
 import { cdnStats, gc as cdnGc, l1GetByPath, l1List, l1Put, l2List, l2Put } from "./cdn";
 import { gitfs } from "./gitfs";
 import { ObjectPath, PATTERNS } from "./path";
@@ -615,6 +616,13 @@ export class Kernel {
   listRules() {
     this.ensureSeeded();
     return rules.list();
+  }
+
+  exportPublic() {
+    this.ensureSeeded();
+    const entries = publishObjects(this.ls("/"), this.listRules());
+    this.journal("cdn.export", publicDir(), { n: entries.length });
+    return { dir: publicDir(), n: entries.length, entries };
   }
 
   toggleRule(id: string) {

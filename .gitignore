@@ -13,4 +13,5 @@ data/objects
 .actos-fs/
 .actos-fs-index
 .actos-l1/
+.actos-cdn/
 data/tickets
