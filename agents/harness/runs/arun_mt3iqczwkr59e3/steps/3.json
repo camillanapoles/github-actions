@@ -1,0 +1,30 @@
+{
+  "id": "arun_mt3iqczwkr59e3_s3",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/3",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 3,
+    "name": "plan/Planejar a partir do goal",
+    "uses": "agent.plan",
+    "status": "ok",
+    "input": {
+      "goal": "smoke cpu github",
+      "with": {}
+    },
+    "output": {
+      "goal": "smoke cpu github",
+      "strategy": "workflow-backed (GitHub Action analog)",
+      "actions": [
+        "kernel.ps",
+        "kernel.write",
+        "kernel.resolve"
+      ]
+    },
+    "path": "/agents/harness/runs/arun_mt3iqczwkr59e3/steps/3",
+    "at": "2026-08-21T22:25:59.423Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
