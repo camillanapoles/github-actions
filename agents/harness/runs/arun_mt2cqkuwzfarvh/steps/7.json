@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt2cqkuwzfarvh_s7",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/7",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 7,
+    "name": "resolve/Resolver execução → objeto",
+    "uses": "kernel.resolve",
+    "status": "ok",
+    "input": {
+      "goal": "F2 gitfs smoke",
+      "with": {}
+    },
+    "output": {
+      "pending": true,
+      "executionId": "ex_mt2cqkuwn6hhcb"
+    },
+    "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/7",
+    "at": "2026-08-21T02:50:25.777Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
