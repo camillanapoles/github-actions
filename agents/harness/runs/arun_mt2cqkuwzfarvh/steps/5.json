@@ -1,0 +1,32 @@
+{
+  "id": "arun_mt2cqkuwzfarvh_s5",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/5",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 5,
+    "name": "act/Agir com syscalls do kernel",
+    "uses": "agent.act",
+    "status": "ok",
+    "input": {
+      "goal": "F2 gitfs smoke",
+      "with": {}
+    },
+    "output": {
+      "summary": "Goal \"F2 gitfs smoke\" observado no kernel.",
+      "cachedExecutions": 14,
+      "runtimeProcesses": 1,
+      "objectIndex": {
+        "rule-doc": 1,
+        "execution": 14,
+        "goal-result": 2,
+        "manifest": 1
+      }
+    },
+    "path": "/agents/harness/runs/arun_mt2cqkuwzfarvh/steps/5",
+    "at": "2026-08-21T02:50:25.742Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
