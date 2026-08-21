@@ -59,3 +59,12 @@ test("sucesso: lookup L1 depois de write", () => {
   const hit = k.lookup(obj.path);
   assert.equal(hit.layer, "L1");
 });
+
+test("sucesso F6: ingest isola dois repos", () => {
+  const k = getKernel();
+  const a = k.ingest({ repo: "acme/shop", kind: "execution", payload: { n: 1 }, id: "same" });
+  const b = k.ingest({ repo: "beta/api", kind: "execution", payload: { n: 2 }, id: "same" });
+  assert.match(a.path, /\/objects\/acme--shop\/execution\/same/);
+  assert.match(b.path, /\/objects\/beta--api\/execution\/same/);
+  assert.notEqual(a.path, b.path);
+});

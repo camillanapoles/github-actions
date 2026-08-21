@@ -1,6 +1,16 @@
-import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
+import { FileDb } from "./file-db";
+
+type DbLike = {
+  exec(sql: string): void;
+  prepare(sql: string): {
+    run: (...args: unknown[]) => { changes?: number };
+    get: (...args: unknown[]) => unknown;
+    all: (...args: unknown[]) => unknown[];
+  };
+  close?: () => void;
+};
 
 function dataDir() {
   return path.dirname(dbPath());
@@ -11,7 +21,7 @@ function dbPath() {
 
 declare global {
   // eslint-disable-next-line no-var
-  var __actosDb: DatabaseSync | undefined;
+  var __actosDb: DbLike | undefined;
 }
 
 const SCHEMA = `
@@ -109,10 +119,17 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_seq ON events(seq);
 `;
 
-export function db(): DatabaseSync {
+export function db(): DbLike {
   if (globalThis.__actosDb) return globalThis.__actosDb;
   fs.mkdirSync(dataDir(), { recursive: true });
-  const instance = new DatabaseSync(dbPath());
+  let instance: DbLike;
+  try {
+    // Node 22+: experimental. Node 20 (Actions default / gh-aw engines) has no node:sqlite.
+    const { DatabaseSync } = require("node:sqlite") as { DatabaseSync: new (p: string) => DbLike };
+    instance = new DatabaseSync(dbPath());
+  } catch {
+    instance = new FileDb(dbPath() + ".json");
+  }
   instance.exec(SCHEMA);
   instance.exec("INSERT OR IGNORE INTO runtime_space (id, processes, updated_at) VALUES ('kernel', '[]', datetime('now'))");
   globalThis.__actosDb = instance;
@@ -121,7 +138,7 @@ export function db(): DatabaseSync {
 
 export function resetDb() {
   try {
-    globalThis.__actosDb?.close();
+    globalThis.__actosDb?.close?.();
   } catch {
     /* */
   }

@@ -8,11 +8,13 @@ on:
 jobs:
   typecheck:
     runs-on: ubuntu-latest
+    env:
+      NODE_NO_WARNINGS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "20"
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
@@ -34,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "20"
       - name: Inject best practice (non-commit return)
         env:
           GH_TOKEN: ${{ github.token }}

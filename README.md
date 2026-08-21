@@ -19,6 +19,8 @@ Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-
 - Audit: [`docs/audit.md`](docs/audit.md)
 - Plano (GitHub = FS + memória + CDN): [`docs/plan-github-os.md`](docs/plan-github-os.md)
 - Puter.js → camadas FS: [`docs/puter-insights.md`](docs/puter-insights.md)
+- **A tua acção (CPU, sem merge):** [`docs/ACAO-HUMANA.md`](docs/ACAO-HUMANA.md)
+- gh-aw / Node 20: [`docs/gh-aw.md`](docs/gh-aw.md)
 
 ---
 
@@ -87,6 +89,7 @@ GET  /api/runtime
 GET  /api/executions?cached=1
 GET  /api/objects?prefix=/objects
 POST /api/objects          { "kind": "note", "payload": { } }
+POST /api/ingest           { "repo": "acme/shop", "kind": "execution", "payload": { } }
 POST /api/agents/run       { "goal": "…", "agentId": "harness" }
 GET  /api/syscalls
 POST /api/syscalls         { "name": "ps", "args": {} }

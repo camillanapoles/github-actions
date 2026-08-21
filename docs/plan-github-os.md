@@ -214,11 +214,12 @@ Entrega: o request HTTP não é o processo. O runner é.
 - CLI `npm run cdn:export`, UI `/publico`, `GET /api/publico`.
 - GitHub Pages na `main` continua a ser a tua acção (igual aos workflows) — ver `docs/ACAO-HUMANA.md`.
 
-### F6 — multi-repo (Nível C do README)
+### F6 — multi-repo (Nível C) — **feito** neste ramo
 
-- Pattern `/objects/{repo}/{kind}/{id}`.
-- Outros projectos só `POST` dispatch ou push de JSON para um repo ACTOS (este).
-- Regras por prefixo de repo.
+- `PATTERNS.objectNs` = `/objects/{repo}/{kind}/{id}` (`repoSlug("acme/shop")` → `acme--shop`).
+- `POST /api/ingest` `{ repo, kind, payload }`.
+- Node **20** nos YAML + `NODE_NO_WARNINGS=1` (gh-aw / Actions JS). Kernel: `node:sqlite` se existir, senão `FileDb`.
+- Ver [`docs/gh-aw.md`](./gh-aw.md).
 
 ---
 

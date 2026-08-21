@@ -18,7 +18,9 @@ export const PATTERNS = {
   runtimeRun: "/runtime/runs/{id}",
   runtimeJob: "/runtime/runs/{id}/jobs/{jobId}",
   object: "/objects/{kind}/{id}",
+  objectNs: "/objects/{repo}/{kind}/{id}",
   cache: "/cache/{workflow}/{sha}/{id}",
+  cacheNs: "/cache/{repo}/{workflow}/{sha}/{id}",
   agent: "/agents/{id}",
   agentRun: "/agents/{id}/runs/{runId}",
   agentStep: "/agents/{id}/runs/{runId}/steps/{n}",
@@ -102,4 +104,10 @@ export function kindFromPath(path: string): string {
   const parts = path.split("/").filter(Boolean);
   if (parts[0] === "objects") return parts[1] ?? "unknown";
   return parts[0] ?? "unknown";
+}
+
+/** owner/name → path segment (gh-aw repo-memory namespacing). */
+export function repoSlug(raw?: string): string {
+  const r = raw || process.env.ACTOS_REPO || process.env.GITHUB_REPOSITORY || "local/actos";
+  return r.replace(/[^A-Za-z0-9._-]+/g, "--");
 }

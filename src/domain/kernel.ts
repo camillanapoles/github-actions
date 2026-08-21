@@ -15,7 +15,7 @@ import { emitIrq, githubDispatchBody, pendingIrqs } from "./irq";
 import { publishObjects, publicDir } from "./public-cdn";
 import { cdnStats, gc as cdnGc, l1GetByPath, l1List, l1Put, l2List, l2Put } from "./cdn";
 import { gitfs } from "./gitfs";
-import { ObjectPath, PATTERNS } from "./path";
+import { ObjectPath, PATTERNS, repoSlug } from "./path";
 import { RuleEngine } from "./rules";
 import type {
   AgentRecord,
@@ -162,7 +162,8 @@ export class Kernel {
   }): StoredObjectRecord {
     this.ensureSeeded();
     const id = input.id ?? nid(input.kind.slice(0, 4));
-    let pattern = input.pattern ?? PATTERNS.object;
+    const repo = input.params?.repo;
+    let pattern = input.pattern ?? (repo ? PATTERNS.objectNs : PATTERNS.object);
     let resolved: string;
     if (input.path) {
       resolved = input.path;
@@ -623,6 +624,21 @@ export class Kernel {
     const entries = publishObjects(this.ls("/"), this.listRules());
     this.journal("cdn.export", publicDir(), { n: entries.length });
     return { dir: publicDir(), n: entries.length, entries };
+  }
+
+  /** F6 — Nível C: outro repo deposita um objeto namespaced. */
+  ingest(input: { repo: string; kind: string; payload: unknown; id?: string }) {
+    this.ensureSeeded();
+    const repo = repoSlug(input.repo);
+    const localId = input.id ?? nid(input.kind.slice(0, 4));
+    return this.write({
+      kind: input.kind,
+      id: `${repo}__${localId}`,
+      pattern: PATTERNS.objectNs,
+      params: { repo, kind: input.kind, id: localId },
+      payload: input.payload,
+      metadata: { repo: input.repo, ns: repo },
+    });
   }
 
   toggleRule(id: string) {

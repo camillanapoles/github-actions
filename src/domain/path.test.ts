@@ -23,3 +23,14 @@ test("sucesso: parse ∘ resolve = identidade", () => {
 test("validação: param em falta falha", () => {
   assert.throws(() => ObjectPath.named("runtimeRun", {}).resolve());
 });
+
+test("sucesso F6: objectNs namespaced por repo", () => {
+  const p = ObjectPath.named("objectNs", {
+    repo: "acme--shop",
+    kind: "execution",
+    id: "1",
+  }).resolve();
+  assert.equal(p, "/objects/acme--shop/execution/1");
+  const parsed = ObjectPath.parse(p);
+  assert.equal(parsed?.params.repo, "acme--shop");
+});
