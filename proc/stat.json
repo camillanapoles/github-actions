@@ -1,0 +1,59 @@
+{
+  "runtime": {
+    "processes": 0,
+    "updatedAt": "2026-08-21T22:05:51.189Z"
+  },
+  "executions": {
+    "byStatus": {
+      "cached": 11,
+      "failed": 1
+    },
+    "cacheHits": 8,
+    "total": 12
+  },
+  "objects": 26,
+  "kinds": [
+    {
+      "kind": "cache",
+      "count": 12
+    },
+    {
+      "kind": "execution",
+      "count": 12
+    },
+    {
+      "kind": "manifest",
+      "count": 1
+    },
+    {
+      "kind": "rule-doc",
+      "count": 1
+    }
+  ],
+  "agents": 2,
+  "rules": 6,
+  "queue": 0,
+  "gitfs": {
+    "head": "103eab9fad8b45148798ea5173c880b5b8c1ca31",
+    "files": 13,
+    "runtimeRefs": [],
+    "workTree": "/home/user/github-actions/.actos-fs",
+    "attached": true,
+    "remoteHead": "103eab9fad8b45148798ea5173c880b5b8c1ca31"
+  },
+  "cdn": {
+    "l1": {
+      "entries": 0,
+      "bytes": 0,
+      "hits": 0
+    },
+    "l2": {
+      "tickets": 0
+    },
+    "ttlMs": 604800000
+  },
+  "extra": {
+    "reason": "fs-sync --push"
+  },
+  "at": "2026-08-21T22:05:51.600Z"
+}
