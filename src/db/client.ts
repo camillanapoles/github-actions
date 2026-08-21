@@ -2,8 +2,12 @@ import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const DB_PATH = path.join(DATA_DIR, "actos.db");
+function dataDir() {
+  return path.dirname(dbPath());
+}
+function dbPath() {
+  return process.env.ACTOS_DB || path.join(process.cwd(), "data", "actos.db");
+}
 
 declare global {
   // eslint-disable-next-line no-var
@@ -107,12 +111,21 @@ CREATE INDEX IF NOT EXISTS idx_events_seq ON events(seq);
 
 export function db(): DatabaseSync {
   if (globalThis.__actosDb) return globalThis.__actosDb;
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  const instance = new DatabaseSync(DB_PATH);
+  fs.mkdirSync(dataDir(), { recursive: true });
+  const instance = new DatabaseSync(dbPath());
   instance.exec(SCHEMA);
   instance.exec("INSERT OR IGNORE INTO runtime_space (id, processes, updated_at) VALUES ('kernel', '[]', datetime('now'))");
   globalThis.__actosDb = instance;
   return instance;
+}
+
+export function resetDb() {
+  try {
+    globalThis.__actosDb?.close();
+  } catch {
+    /* */
+  }
+  globalThis.__actosDb = undefined;
 }
 
 export function nowIso(): string {

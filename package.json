@@ -13,6 +13,7 @@
     "fs:init": "npx tsx src/cli/fs-sync.ts --init",
     "fs:push": "npx tsx src/cli/fs-sync.ts --push",
     "gc": "npx tsx src/cli/gc.ts --promote",
+    "test": "node --experimental-sqlite --import tsx --test src/**/*.test.ts src/*.test.ts",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts"
   },
   "dependencies": {

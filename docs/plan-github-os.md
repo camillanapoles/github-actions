@@ -191,7 +191,14 @@ Entrega: o disco **é** um ramo git. Push para origin quando o remoto aceitar `a
 
 Entrega: lookup L1 → SQLite/L3; L1 nunca é origem.
 
-### F4 — CPU event-driven (agent as job)
+### F4 — CPU event-driven (agent as job) — **parcial neste ramo**
+
+- `src/domain/irq.ts` — IRQ persistente (`data/irq.jsonl`).
+- `enqueueAgent` emite `repository_dispatch` payload `{ event_type: "agent.run", client_payload }`.
+- `GET/POST /api/irq`. CPU continua `drain` / Action.
+- Testes de validação/sucesso: `npm test`.
+
+Ainda falta copiar YAML para `.github/workflows/` na default branch (token sem `workflows`).
 
 - YAML em `.github/workflows/` (cópia única para `main`).
 - `POST /api/agents/run` → `repository_dispatch` `actos.syscall`.

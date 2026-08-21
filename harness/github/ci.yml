@@ -16,6 +16,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
+      - name: QA — testes de validação e sucesso
+        run: npm test
       - name: Seed + smoke agent (serverless runtime analog)
         run: |
           npm run seed

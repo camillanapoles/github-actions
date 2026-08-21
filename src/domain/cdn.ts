@@ -11,10 +11,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { cas } from "./cas";
 
-const ROOT = process.cwd();
-const L1_DIR = path.join(ROOT, ".actos-l1");
-const L2_DIR = path.join(ROOT, "data", "tickets");
-const INDEX = path.join(L1_DIR, "index.json");
+function l1Dir() {
+  return process.env.ACTOS_L1 || path.join(process.cwd(), ".actos-l1");
+}
+function l2Dir() {
+  return process.env.ACTOS_L2 || path.join(process.cwd(), "data", "tickets");
+}
+function indexFile() {
+  return path.join(l1Dir(), "index.json");
+}
 
 const L1_TTL_MS = 7 * 24 * 3600 * 1000;
 const PROMOTE_AFTER_MS = 5 * 24 * 3600 * 1000;
@@ -44,15 +49,15 @@ type IndexFile = { entries: Record<string, L1Entry> };
 
 function loadIndex(): IndexFile {
   try {
-    return JSON.parse(fs.readFileSync(INDEX, "utf8")) as IndexFile;
+    return JSON.parse(fs.readFileSync(indexFile(), "utf8")) as IndexFile;
   } catch {
     return { entries: {} };
   }
 }
 
 function saveIndex(idx: IndexFile) {
-  fs.mkdirSync(L1_DIR, { recursive: true });
-  fs.writeFileSync(INDEX, JSON.stringify(idx, null, 2));
+  fs.mkdirSync(l1Dir(), { recursive: true });
+  fs.writeFileSync(indexFile(), JSON.stringify(idx, null, 2));
 }
 
 export function l1Key(body: unknown, objectPath: string): string {
@@ -61,7 +66,7 @@ export function l1Key(body: unknown, objectPath: string): string {
 
 export function l1Put(objectPath: string, body: unknown): L1Entry {
   const sha = l1Key(body, objectPath);
-  const dir = path.join(L1_DIR, sha);
+  const dir = path.join(l1Dir(), sha);
   fs.mkdirSync(dir, { recursive: true });
   const raw = JSON.stringify({ path: objectPath, body }, null, 2);
   fs.writeFileSync(path.join(dir, "payload.json"), raw);
@@ -87,7 +92,7 @@ export function l1Get(sha: string): { path: string; body: unknown; entry: L1Entr
     l1Evict(sha);
     return null;
   }
-  const file = path.join(L1_DIR, sha, "payload.json");
+  const file = path.join(l1Dir(), sha, "payload.json");
   if (!fs.existsSync(file)) {
     l1Evict(sha);
     return null;
@@ -111,23 +116,23 @@ export function l1Evict(sha: string) {
   const idx = loadIndex();
   delete idx.entries[sha];
   saveIndex(idx);
-  const dir = path.join(L1_DIR, sha);
+  const dir = path.join(l1Dir(), sha);
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
 export function l2Put(ticket: Omit<L2Ticket, "at">): L2Ticket {
-  fs.mkdirSync(L2_DIR, { recursive: true });
+  fs.mkdirSync(l2Dir(), { recursive: true });
   const rec: L2Ticket = { ...ticket, at: new Date().toISOString() };
-  fs.writeFileSync(path.join(L2_DIR, `${ticket.runId}.json`), JSON.stringify(rec, null, 2));
+  fs.writeFileSync(path.join(l2Dir(), `${ticket.runId}.json`), JSON.stringify(rec, null, 2));
   return rec;
 }
 
 export function l2List(): L2Ticket[] {
-  if (!fs.existsSync(L2_DIR)) return [];
+  if (!fs.existsSync(l2Dir())) return [];
   return fs
-    .readdirSync(L2_DIR)
+    .readdirSync(l2Dir())
     .filter((f) => f.endsWith(".json"))
-    .map((f) => JSON.parse(fs.readFileSync(path.join(L2_DIR, f), "utf8")) as L2Ticket);
+    .map((f) => JSON.parse(fs.readFileSync(path.join(l2Dir(), f), "utf8")) as L2Ticket);
 }
 
 export function gc(now = Date.now()): { evicted: string[]; promote: L1Entry[] } {
@@ -164,4 +169,4 @@ export function l1List(): L1Entry[] {
   return Object.values(loadIndex().entries).sort((a, b) => b.hits - a.hits);
 }
 
-export const CDN_PATHS = { L1_DIR, L2_DIR, L1_TTL_MS, PROMOTE_AFTER_MS };
+export const CDN_PATHS = { L1_TTL_MS, PROMOTE_AFTER_MS };

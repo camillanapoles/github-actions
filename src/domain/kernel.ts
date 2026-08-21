@@ -11,6 +11,7 @@ import {
   syscalls,
 } from "@/db/repo";
 import { cacheKey as casKey } from "./cas";
+import { emitIrq, githubDispatchBody, pendingIrqs } from "./irq";
 import { cdnStats, gc as cdnGc, l1GetByPath, l1List, l1Put, l2List, l2Put } from "./cdn";
 import { gitfs } from "./gitfs";
 import { ObjectPath, PATTERNS } from "./path";
@@ -311,10 +312,12 @@ export class Kernel {
       expiresAtMs,
     });
     this.journal("mount", proc.path, { pid: proc.pid, ttlMs });
-    try {
-      gitfs().mountRef(proc.pid, proc);
-    } catch {
-      /* refs/actos/runtime optional */
+    if (process.env.ACTOS_GITFS !== "0") {
+      try {
+        gitfs().mountRef(proc.pid, proc);
+      } catch {
+        /* refs/actos/runtime optional */
+      }
     }
     return this.ps();
   }
@@ -450,6 +453,10 @@ export class Kernel {
       createdAt: nowIso(),
       finishedAt: hit ? nowIso() : null,
     };
+    if (!hit) {
+      const irq = emitIrq({ type: "actos.syscall", goal, runId, agentId: agent.id });
+      run.result = { queued: true, cacheKey: key, irq: githubDispatchBody(irq) };
+    }
     agentRuns.upsert(run);
     this.journal("enqueue", `/agents/${agent.id}/runs/${runId}`, {
       goal,
@@ -457,6 +464,10 @@ export class Kernel {
       cacheHit: Boolean(hit),
     });
     return run;
+  }
+
+  listIrqs() {
+    return pendingIrqs();
   }
 
   async drain(limit = 8): Promise<AgentRunRecord[]> {
@@ -639,10 +650,12 @@ export class Kernel {
       payload: obj.payload,
       metadata: obj.metadata,
     };
-    try {
-      gitfs().write(obj.path, body);
-    } catch {
-      /* L3 origin is best-effort until git is available */
+    if (process.env.ACTOS_GITFS !== "0") {
+      try {
+        gitfs().write(obj.path, body);
+      } catch {
+        /* L3 origin is best-effort until git is available */
+      }
     }
     try {
       l1Put(obj.path, body);
@@ -703,4 +716,9 @@ let singleton: Kernel | undefined;
 export function getKernel(): Kernel {
   if (!singleton) singleton = new Kernel();
   return singleton;
+}
+
+export function resetKernel() {
+  singleton = undefined;
+  globalThis.__actosLive = undefined;
 }
