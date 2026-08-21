@@ -16,6 +16,9 @@ depois de read/write        →  regras no path
 
 Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-actions/pull/1
 
+- Audit: [`docs/audit.md`](docs/audit.md)
+- Plano (GitHub = FS + memória + CDN): [`docs/plan-github-os.md`](docs/plan-github-os.md)
+
 ---
 
 ## 1. Caso do projeto — o que resolve

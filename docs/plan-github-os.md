@@ -1,0 +1,238 @@
+# Plano: GitHub como OS serverless (FS + memória + CDN)
+
+ACTOS deixa de *imitar* um OS em SQLite local e passa a **montar o GitHub como o metal**.
+
+O runner é CPU. Não há RAM persistente entre jobs — isso não é um bug do GitHub, é a definição de serverless. A engenharia é **hierarquia de memória + identidade por conteúdo + eventos**, exactamente como um CDN.
+
+GitHub Agentic Workflows já nomeia a mesma cisão: **Cache Memory** (Actions cache, 7d) vs **Repo Memory** (branches, ilimitado). Nós tornamos isso num **sistema de ficheiros com path `pattern+id`**, um `/proc`, um journal e um CDN.
+
+Referências: [cache-memory (gh-aw)](https://github.github.com/gh-aw/reference/cache-memory/), [docs de cache](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching), [changelog 10GB+](https://github.blog/changelog/2025-11-20-github-actions-cache-size-can-now-exceed-10-gb-per-repository/).
+
+---
+
+## 1. Analogia CDN → nova usabilidade
+
+Um CDN não “tem RAM”. Tem **camadas com TTL e identidade**.
+
+| CDN | ACTOS no GitHub | Papel |
+| --- | --- | --- |
+| Origin (S3/CAS) | git objects + orphan `actos/fs` | verdade, content-addressed |
+| Origin shield | cache da *default branch* | o único L1 que todos os PRs podem ler |
+| Edge PoP | `actions/cache` no runner | RAM quente, 7d LRU, ~10 GB/repo |
+| Cache-Control / ETag | chave = hash do conteúdo | HIT só se o trabalho for o mesmo |
+| `stale-while-revalidate` | `restore-keys` (prefixo sem run_id) | serve velho, recompila |
+| Purge | `gh cache delete` + apagar tag | GC |
+| URL imutável | `refs/tags/actos/obj/{sha}` + Pages | CDN público |
+| Revalidate | miss no hash → job | CPU serverless |
+| Access log | `git log` + Actions logs + Checks | dmesg / register |
+
+**Usabilidade nova:** não “corre a CI e descarrega o artifact”.  
+Pedes um **path** (`/cache/{workflow}/{sha}/{id}`). O sistema:
+
+1. procura L1 (Actions cache) — edge
+2. senão L2 (artifact do run) — PoP
+3. senão L3 (blob git no `actos/fs`) — origin
+4. senão L4 (Pages, se público) — CDN
+5. miss total → `repository_dispatch` = IRQ → o runner *é* o compute
+
+Isto é **serverless para OS**: o processo não vive; o **objecto** vive. Exactamente o invariante `in_runtime → resolved → cached`.
+
+---
+
+## 2. Hierarquia de memória (localizar com estratégia)
+
+```
+CPU     GitHub-hosted runner          timeout 6h; sem estado ao sair
+L0      workspace do job              /tmp + GITHUB_WORKSPACE      efémero
+L1      Actions cache                 7d, LRU, 10GB default*       RAM quente
+L2      Artifacts                     1–90d, quota de storage      tmpfs / swap
+L3      git refs + orphan branch      ilimitado no repo            disco
+L4      GitHub Pages / raw URLs       CDN                          edge público
+L5      Releases (opcional)           imutável, binários grandes   cold archive
+
+* 10GB grátis; acima é billing. Eviction LRU. Cache de PR NÃO vaza para main.
+```
+
+### Onde cada coisa mora (não misturar)
+
+| Dado | Camada | Porquê |
+| --- | --- | --- |
+| Processo vivo (`/runtime/runs/{id}`) | **ref leve** `refs/actos/runtime/{pid}` → commit mínimo | 41 bytes; force-push; delete = unmount. Não é branch com tree enorme. |
+| Objecto resolvido | **tree** em orphan `actos/fs` no path do pattern | disco, versionado, `git log` = journal do inode |
+| CAS (payload bytes) | git blob; tag `actos/obj/{sha256}` | imutável; partilhável; CDN |
+| Working set da sessão | L1 cache key `actos-l1-{hash}` | 7d; se esfriar, promove-se a L3 *antes* da eviction |
+| Ticket entre jobs do *mesmo* workflow | L2 artifact (pointer: sha, não o blob outra vez) | artifacts são caros; guardar SHA, não duplicar |
+| Índice `/proc` | `actos/fs/proc/stat.json` + Checks API | `ps`; register |
+| Evento | `repository_dispatch` / `workflow_run` / `push` em `actos/fs` | IRQ |
+| Código do kernel (Next, CLI) | ramos `arena/…` e `main` | **nunca** misturar com `actos/fs` |
+
+Sub-branches: `arena/<sessao>` = código. `actos/fs` = VFS. `actos/cdn` ou `gh-pages` = árvore pública. Tags = snapshots imutáveis. Não são “mais branches de feature”.
+
+---
+
+## 3. Limitações do GitHub → alternativa *dentro* do workspace
+
+Não saímos do GitHub. Cada limite tem um primitive que já existe.
+
+| Limitação | Efeito | Alternativa no repo |
+| --- | --- | --- |
+| Runner sem RAM entre jobs | espaço único morre no `unmount` real | ref `refs/actos/runtime/{pid}` + checkpoint commit; o processo *é* a ref |
+| Job ≤ 6h | agente longo morre | fatiar: commit checkpoint → `repository_dispatch` slice N+1 (continuação = IRQ) |
+| Cache 7d + LRU 10GB | L1 desaparece | **promote-before-evict**: job `gc` semanal copia hashes quentes para `actos/fs` |
+| Cache **isolado por branch**; PR grava em `refs/pull/…/merge` e não serve o main | HIT mentiroso entre PRs | L1 só como atalho; **origem** é `actos/fs` na default branch. PRs *leem* origin shield (main). Writes de objectos só via `workflow_run` na default, ou push directo a `actos/fs` com `concurrency` |
+| Artifact quota (GB-hours, 90d default) | storage explode | artifact = **ponteiro** (json `{sha, path}`); blob no git CAS. `retention-days: 1` no L2 |
+| `GITHUB_TOKEN` não cria `.github/workflows` (esta sessão) | Action “não existe” no GitHub | fonte em `harness/github/`; um humano / PAT com `workflows` copia **uma vez** para `main`. Daí para a frente o CPU existe |
+| Token não deve escrever código em `main` | risco | `contents: write` **só** em `actos/fs` e `refs/actos/*`. Concurrency group `actos-fs` = mutex do VFS |
+| 200 cache uploads/min | throttle | batch: um save L1 por job, chave = merkle da tree tocada |
+| Sem shared memory entre jobs | | L2 artifact intra-workflow; L1 se cross-workflow *na mesma branch* |
+| `workflow_dispatch` só activo se o YAML está na **default branch** | harness morto em feature branch | YAML mínimo em `main`; o programa (CLI + `harness/workflows/agent.yaml`) vem do checkout do SHA pedido |
+| Force-push em orphan perde história se mal usado | | **não** force-push `actos/fs`. Só append. Force só em `refs/actos/runtime/*` (RAM) |
+| Pages é público | | `actos/cdn` só com objectos já passados pelas regras `transform` (redact). Privado = raw via API autenticada |
+
+---
+
+## 4. Event-driven, logger, register
+
+### IRQ (não polling)
+
+```
+push arena/*            → ci (código)
+workflow_dispatch goal  → agent-harness (CPU)
+repository_dispatch
+  actos.syscall         → kernel no runner
+  actos.slice           → continuação após checkpoint
+workflow_run completed  → runtime-persist (resolve → L3)
+push actos/fs           → index + Pages (CDN revalidate)
+schedule 17 * * * *     → gc: L1→L3 promote, apagar runtime refs órfãs
+delete refs/actos/runtime/{pid}  → unmount
+```
+
+A page async **não** chama a API da GitHub em loop. Lê L3 (clone shallow de `actos/fs`) ou a projecção SQLite local. O GitHub emite o evento; nós materializamos.
+
+### Logger = journal
+
+- `git log actos/fs -- objects/...` = histórico do inode (quem, quando, sha)
+- Actions log do run = stdout do processo (efémero, 90d)
+- Checks annotations = dmesg daquele pid
+- Tag anotada `actos/obj/{sha}` = manifesto (path, kind, regra)
+
+Uma linha de journal local (SQLite `events`) **espelha** o commit em `actos/fs`. Replay = `git log`. A SQLite deixa de ser origem.
+
+### Register = `/proc`
+
+- Checks API: `ps` (in_progress / success / failure)
+- `actos/fs/proc/stat.json`: contagens, last_gc, L1 size
+- `concurrency: actos-fs` no workflow = spinlock do disco
+- Label `arena-agent` + tag git = sessão do operador (não misturar com o kernel)
+
+---
+
+## 5. Contrato de path (não muda)
+
+O utilizador e os outros projectos continuam a ver:
+
+```
+/runtime/runs/{id}
+/objects/{kind}/{id}                 → mais tarde /objects/{repo}/{kind}/{id}
+/cache/{workflow}/{sha}/{id}
+/agents/{id}/runs/{runId}/steps/{n}
+```
+
+Por baixo:
+
+```
+actos/fs/objects/{kind}/{id}.json     blob + tree
+refs/actos/runtime/{id}               → commit { path, startedAt }
+refs/tags/actos/obj/{sha256}          imutável
+cache key actos-l1-{sha256}           L1
+```
+
+`resolve` = unmount da ref runtime + `git commit` no path + tag CAS + (opcional) save L1.
+
+Cache **content-addressed**: `sha256(workflow || inputs canónicos || tree sha)`. Sem SHA aleatório.
+
+---
+
+## 6. Como construir (fases)
+
+Não abrir LLM, Postgres, nem microserviços. Cortar o analog até ser verdade no GitHub.
+
+### F0 — papel (este commit)
+
+Audit + este plano. PR aberto. Sem merge.
+
+### F1 — CAS + journal *local* (ainda SQLite, mas honesto)
+
+- Tirar `fakeSha()`. `cacheKey = sha256(goal + workflow + inputs)`.
+- Tabela `events` append-only; `resolve` numa transação.
+- Runtime in-memory + TTL; seed não deixa `in_runtime` eterno.
+- `runAgent` na API só enfileira (objecto `queued`); quem corre é CLI/Action.
+
+Entrega: HIT real; page async continua igual.
+
+### F2 — Git como L3 (o FS)
+
+- Orphan `actos/fs` (uma vez): tree vazia `proc/stat.json`.
+- CLI `actos-sync`: `write` → blob + commit na branch `actos/fs` (path = pattern).
+- `git push origin HEAD:refs/actos/runtime/{pid}` no mount; `git push origin :refs/actos/runtime/{pid}` no unmount.
+- `concurrency: actos-fs`. Permissão `contents: write` limitada a estes refs.
+- Page async: `git fetch origin actos/fs` *ou* projecção SQLite alimentada pelo fetch.
+
+Entrega: o disco **é** o GitHub. A SQLite é cache da UI.
+
+### F3 — L1/L2 como CDN edge
+
+- `actions/cache` key = `actos-l1-{sha256}`; `restore-keys: actos-l1-`.
+- Artifact só `{sha, path, run_id}`, `retention-days: 1`.
+- Workflow `gc.yml` (schedule): lista caches; se idade > 5d e objecto ainda quente, commit em `actos/fs`; apaga L1 frio.
+- Nunca gravar L1 a partir de PR *como origem* — só atalho. Persist em `workflow_run` na default.
+
+Entrega: HIT rápido no runner; origem sempre L3.
+
+### F4 — CPU event-driven (agent as job)
+
+- YAML em `.github/workflows/` (cópia única para `main`).
+- `POST /api/agents/run` → `repository_dispatch` `actos.syscall`.
+- Slice: se o job aproxima timeout, checkpoint L3 + dispatch `actos.slice`.
+- `workflow_run` → persist (já esboçado em `runtime-persist.yml`).
+
+Entrega: o request HTTP não é o processo. O runner é.
+
+### F5 — CDN público + regras
+
+- `actos/cdn` ou Pages a partir de `actos/fs` filtrado (só kinds públicos, transform redact).
+- URL imutável: `/obj/{sha256}` e URL estável `/objects/{kind}/{id}` (último tag).
+- Purge = rebuild Pages (barato, tree já está no git).
+
+Entrega: a “page async” pode ser estática no edge para objectos já resolvidos.
+
+### F6 — multi-repo (Nível C do README)
+
+- Pattern `/objects/{repo}/{kind}/{id}`.
+- Outros projectos só `POST` dispatch ou push de JSON para um repo ACTOS (este).
+- Regras por prefixo de repo.
+
+---
+
+## 7. O que *não* fazer
+
+- Usar `main` como VFS (polui o código, rebenta o cache de CI).
+- Force-push `actos/fs`.
+- Meter o blob inteiro em artifact “porque é fácil”.
+- Confiar no cache de PR como verdade.
+- Banner Arena dentro do kernel.
+- Esperar que L1 seja disco. É edge. 7 dias, LRU, isolamento de branch.
+
+---
+
+## 8. Semelhança que importa
+
+| Sistema | Lição para ACTOS |
+| --- | --- |
+| CDN (Cloudflare/Fastly) | identidade = hash; edge ≠ origin; purge explícito |
+| git / Nix / IPFS | CAS; o path é nome, o sha é o objecto |
+| Plan 9 /proc | runtime é ficheiro; unmount é unlink da ref |
+| Lambda + S3 + CloudFront | CPU sem memória; S3 origin; CloudFront L1 |
+| gh-aw Cache vs Repo Memory | GitHub já admite as duas memórias — nós damos-lhes **path + regras + journal** |
+
+A usabilidade que criamos: **GitHub deixa de ser CI e passa a ser um computador serverless cujo disco é o repositório, cuja RAM é o cache, cujo CDN são Pages/tags, e cujo syscall é um workflow event-driven.**
