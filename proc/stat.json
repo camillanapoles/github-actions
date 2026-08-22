@@ -1,25 +1,37 @@
 {
   "runtime": {
     "processes": 0,
-    "updatedAt": "2026-08-21T23:42:18.528Z"
+    "updatedAt": "2026-08-22T01:08:15.677Z"
   },
   "executions": {
     "byStatus": {
-      "cached": 11,
+      "cached": 12,
       "failed": 1
     },
     "cacheHits": 8,
-    "total": 12
+    "total": 13
   },
-  "objects": 26,
+  "objects": 64,
   "kinds": [
     {
+      "kind": "agent-step",
+      "count": 27
+    },
+    {
       "kind": "execution",
-      "count": 12
+      "count": 15
     },
     {
       "kind": "cache",
-      "count": 12
+      "count": 14
+    },
+    {
+      "kind": "agent-run",
+      "count": 3
+    },
+    {
+      "kind": "goal-result",
+      "count": 3
     },
     {
       "kind": "rule-doc",
@@ -34,41 +46,54 @@
   "rules": 6,
   "queue": 0,
   "gitfs": {
-    "head": "7e50db8c0614e633b051adec44b0c873ada2dee7",
-    "files": 27,
+    "head": "6aaac6aff45106bae248bd4a4d74a93622670f84",
+    "files": 39,
     "runtimeRefs": [],
     "workTree": "/home/runner/work/github-actions/github-actions/.actos-fs",
     "attached": true,
-    "remoteHead": "d6c0a6e8a354805ed84504adf9d4ce809022a738",
+    "remoteHead": "aae4abffce9a09672d5427f0e23708853f44d373",
     "casTags": [
       "refs/tags/actos/obj/04b3c5e18726dd85ea305c7a38fc29b985b324d7414ddb74f6489b1f793d4b62",
+      "refs/tags/actos/obj/15b087314638b912114f0edffc27b11e386748ff9c030110214f1813e2f09e77",
       "refs/tags/actos/obj/19d520b2419f06febee152588f7f66750cf4d3680005833208d7ca701bdf97b5",
       "refs/tags/actos/obj/1bef0f3df1660664ad1816bebe1adc571113dcec663ce3e6ac392ec24d110e5c",
+      "refs/tags/actos/obj/20fb0015a6aeac09054c330afcc155363b7864933312222f02fc258b1f4a8b6a",
+      "refs/tags/actos/obj/37011ee1d2eff71987c83a67079b1f9b73c051152b0c456d16102245546e45a1",
       "refs/tags/actos/obj/4367d538f32434d2d1c62e839e7ace5c522510b7c78b0e59d4e6eace4b3c0409",
+      "refs/tags/actos/obj/6097f65050d6e2c8fcf1551deff06fa660b36d6892d2bffcb88223193a985abb",
+      "refs/tags/actos/obj/625cf6aa549bdad7e86b2ca8165a1643e462e48e30efb50c6212681d22ffd8de",
       "refs/tags/actos/obj/62831300e4dfb917fc912362acff61efe853764f52258102f9f093a3cb0bec44",
       "refs/tags/actos/obj/63dc5e637d89ce7f1b9bd33b7214b3493553c611ca0bd5faa3f9f31bdb8168b9",
+      "refs/tags/actos/obj/83f9438605e86256ad1dcaadd42b3d98a4085e2782fbdf9ad9c4acec2457f06d",
       "refs/tags/actos/obj/9220f925990967f228b9a4244598e380741db166234406cccd7863235dc32247",
       "refs/tags/actos/obj/94157e69a3bd430f08fa169abc792473f9ce43ed6e6be804614d5a1a66c62527",
+      "refs/tags/actos/obj/9632d0415835c661edccd2dca8f61767690a340b0ca7539714d2f5946868b5a3",
+      "refs/tags/actos/obj/965cb7578619c06cb60f5c61badc8947f88902459e8a57bb2533ba1bb2ef897a",
       "refs/tags/actos/obj/a1f738421ca498de7fa92ee511eb67770f990fa6dec6043038bcca3e7b2cf07a",
+      "refs/tags/actos/obj/a22d131d95bf10732aca263d3c0d9150c72f65e420c73595d9f438ff25ab9f8c",
       "refs/tags/actos/obj/a3d861c0e2d0416355607ef9c06acab8d869f32dbab116a746d5c0e1e48d8fab",
       "refs/tags/actos/obj/af37e0311f8bf85a5e03e6a84a39b44055c2fb5ccb690bed636c57ae947121ae",
+      "refs/tags/actos/obj/b441de3dab3e8582cd6ef5692bd0db0e2908990068f6c43306a14738373ddfc6",
       "refs/tags/actos/obj/dad0ad0e11aa73025ae145ce35f766b722f9ec7276450debc782cd67656a0244",
-      "refs/tags/actos/obj/ee93680dfe7080b7d1981f760af342b8cd9f1f015f939439edba15a8ae7d63a8"
+      "refs/tags/actos/obj/deb545eac3990686e5e49c15168b61396a678da7cbaed7bf201005be3eab4f23",
+      "refs/tags/actos/obj/eca35ff4ebb1a6ee2d902523777699136dd4102bf71cbf6e69fe0c4da10d30c1",
+      "refs/tags/actos/obj/ee93680dfe7080b7d1981f760af342b8cd9f1f015f939439edba15a8ae7d63a8",
+      "refs/tags/actos/obj/f3e176803d4de8269c0de9f8fb6207526be1fe82d7fae132da35d1fa87f09b91"
     ]
   },
   "cdn": {
     "l1": {
-      "entries": 0,
-      "bytes": 0,
-      "hits": 0
+      "entries": 14,
+      "bytes": 17449,
+      "hits": 14
     },
     "l2": {
-      "tickets": 0
+      "tickets": 2
     },
     "ttlMs": 604800000
   },
   "extra": {
     "reason": "fs-sync --push"
   },
-  "at": "2026-08-21T23:42:18.730Z"
+  "at": "2026-08-22T01:08:16.028Z"
 }
