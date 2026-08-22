@@ -1,0 +1,57 @@
+name: actos-llmcalc-page
+
+# GITOS: o que era `docker compose up` (nginx a servir a SPA) passa a build no
+# runner (CPU) + publicação em GitHub Pages, em webpage/llm-infra-planner/.
+#
+# COPIAR para .github/workflows/ para ativar. Nunca docker build / docker compose
+# aqui — o runner é o CPU.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * *"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    env:
+      NODE_NO_WARNINGS: "1"
+      ACTOS_REPO: camillanapoles/github-actions
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+
+      # CPU (runner, não Docker): constrói a SPA do clone
+      - name: Build LLMcalc (CPU = node, no Docker)
+        working-directory: examples/06-docker-to-actos/llm-infra-planner
+        run: |
+          npm ci
+          npx vite build --base ./
+
+      # Publica em webpage/ (subdiretório — não sobreescreve a raiz ACTOS)
+      - name: Publish to webpage/llm-infra-planner
+        run: |
+          rm -rf webpage/llm-infra-planner
+          mkdir -p webpage/llm-infra-planner
+          cp -r examples/06-docker-to-actos/llm-infra-planner/dist/. webpage/llm-infra-planner/
+          cp webpage/llm-infra-planner/index.html webpage/llm-infra-planner/404.html
+          touch webpage/llm-infra-planner/.nojekyll
+
+      - name: Commit webpage (so cdn-pages deploys it)
+        run: |
+          git config user.name "actos[bot]"
+          git config user.email "actos@users.noreply.github.com"
+          git add webpage/llm-infra-planner
+          git commit -m "chore: rebuild llm-infra-planner page (ACTOS CPU)" || echo "nothing to commit"
+          git push
+
+      # Persiste o resultado como objeto ACTOS (igual ao plugin install.sh)
+      - name: Persist ACTOS object
+        run: node examples/06-docker-to-actos/run.mjs

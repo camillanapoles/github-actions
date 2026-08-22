@@ -81,3 +81,10 @@ test("05 hub-ingest emite contrato POST /api/ingest", () => {
   const body = JSON.parse(r.stdout);
   assert.ok(body.repo && body.kind && body.payload);
 });
+
+test("06 docker→actos: gera webpage/llm-infra-planner e persiste llmcalc-page", () => {
+  const r = run("examples/06-docker-to-actos/run.mjs");
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /llmcalc-page/);
+  assert.ok(fs.existsSync(path.join(root, "webpage/llm-infra-planner/index.html")));
+});
