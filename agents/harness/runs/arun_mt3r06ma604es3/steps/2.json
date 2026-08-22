@@ -1,0 +1,31 @@
+{
+  "id": "arun_mt3r06ma604es3_s2",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/2",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 2,
+    "name": "plan/Ler memória (objetos permitidos)",
+    "uses": "kernel.ls",
+    "status": "ok",
+    "input": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "with": {
+        "prefix": "/objects"
+      }
+    },
+    "output": {
+      "objects": 20,
+      "memoryPaths": [
+        "/objects",
+        "/cache",
+        "/runtime"
+      ]
+    },
+    "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/2",
+    "at": "2026-08-22T02:17:34.632Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
