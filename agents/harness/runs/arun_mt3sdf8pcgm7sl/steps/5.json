@@ -1,0 +1,32 @@
+{
+  "id": "arun_mt3sdf8pcgm7sl_s5",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3sdf8pcgm7sl/steps/5",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 5,
+    "name": "act/Agir com syscalls do kernel",
+    "uses": "agent.act",
+    "status": "ok",
+    "input": {
+      "goal": "npm run cdn:export",
+      "with": {}
+    },
+    "output": {
+      "summary": "Goal \"npm run cdn:export\" observado no kernel.",
+      "cachedExecutions": 11,
+      "runtimeProcesses": 1,
+      "objectIndex": {
+        "rule-doc": 1,
+        "goal-result": 4,
+        "execution": 16,
+        "manifest": 1
+      }
+    },
+    "path": "/agents/harness/runs/arun_mt3sdf8pcgm7sl/steps/5",
+    "at": "2026-08-22T02:55:51.958Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
