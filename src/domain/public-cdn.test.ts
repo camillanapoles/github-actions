@@ -49,8 +49,8 @@ test("sucesso: URL imutável obj/{sha}.json e estável por path", () => {
     dir,
   );
   assert.equal(out.length, 1);
-  assert.match(out[0].immutable, /^\/obj\/[a-f0-9]{64}\.json$/);
-  const published = JSON.parse(fs.readFileSync(path.join(dir, out[0].immutable.slice(1)), "utf8"));
+  assert.match(out[0].immutable, /^\.\/obj\/[a-f0-9]{64}\.json$/);
+  const published = JSON.parse(fs.readFileSync(path.join(dir, out[0].immutable.replace(/^\.\//, "")), "utf8"));
   assert.equal(published.payload.token, "***");
   assert.equal(published.payload.hello, 1);
 });
@@ -69,4 +69,23 @@ test("validação: deny e /runtime /agents não saem para o público", () => {
   );
   assert.equal(out.length, 1);
   assert.equal(out[0].path, "/objects/manifest/kernel");
+});
+
+test("sucesso: GITHUB_REPOSITORY prefixa /{repo} (Pages de projecto)", () => {
+  const prev = process.env.GITHUB_REPOSITORY;
+  process.env.GITHUB_REPOSITORY = "camillanapoles/github-actions";
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pub-base-"));
+  try {
+    const out = publishObjects(
+      [obj({ path: "/objects/manifest/kernel", kind: "manifest", payload: { ok: true } })],
+      [],
+      dir,
+    );
+    assert.match(out[0].immutable, /^\/github-actions\/obj\/[a-f0-9]{64}\.json$/);
+    const html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
+    assert.match(html, /href="\.\/obj\/[a-f0-9]{64}\.json"/);
+  } finally {
+    if (prev == null) delete process.env.GITHUB_REPOSITORY;
+    else process.env.GITHUB_REPOSITORY = prev;
+  }
 });

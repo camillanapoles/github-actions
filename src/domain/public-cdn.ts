@@ -16,6 +16,19 @@ export function publicDir() {
   return process.env.ACTOS_CDN || path.join(process.cwd(), ".actos-cdn");
 }
 
+/** Project Pages live at /{repo}/ — a leading /obj 404s on the user site. */
+export function cdnBase(): string {
+  if (process.env.ACTOS_CDN_BASE != null) return process.env.ACTOS_CDN_BASE.replace(/\/$/, "");
+  const repo = process.env.GITHUB_REPOSITORY || "";
+  const name = repo.split("/")[1];
+  return name ? `/${name}` : "";
+}
+
+function href(rel: string): string {
+  const base = cdnBase();
+  return base ? `${base}/${rel}` : `./${rel}`;
+}
+
 export type PublicEntry = {
   sha: string;
   path: string;
@@ -55,19 +68,22 @@ export function publishObjects(
       sha,
       path: obj.path,
       kind: obj.kind,
-      immutable: "/" + immutableRel,
-      stable: "/" + stableRel,
+      immutable: href(immutableRel),
+      stable: href(stableRel),
     });
   }
 
-  fs.writeFileSync(path.join(outDir, "index.json"), JSON.stringify({ n: published.length, entries: published }, null, 2));
+  fs.writeFileSync(
+    path.join(outDir, "index.json"),
+    JSON.stringify({ n: published.length, base: cdnBase() || ".", entries: published }, null, 2),
+  );
   fs.writeFileSync(
     path.join(outDir, "index.html"),
     `<!doctype html><meta charset="utf-8"><title>ACTOS CDN</title>
 <body style="font-family:monospace;background:#07080c;color:#e8edf5;padding:2rem">
 <h1>ACTOS public CDN</h1>
-<p>${published.length} objects · immutable /obj/{sha}.json</p>
-<ul>${published.map((e) => `<li><a style="color:#6ea8ff" href="${e.immutable}">${e.path}</a></li>`).join("")}</ul>
+<p>${published.length} objects · immutable ./obj/{sha}.json · base ${cdnBase() || "."}</p>
+<ul>${published.map((e) => `<li><a style="color:#6ea8ff" href="./obj/${e.sha}.json">${e.path}</a></li>`).join("")}</ul>
 </body>`,
   );
   return published;

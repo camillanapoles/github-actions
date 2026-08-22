@@ -61,7 +61,9 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 - [x] E9 · E12 · E14b — validados 2026-08-22
 - [ ] E11 CodeQL *actions* no PR: **esperado**, não é débito do OS
-- [x] Plugin + skill `/convert` + receita `llm-infra-planner` — nesta entrega
+- [x] Plugin + skill `/convert` + receita `llm-infra-planner` — `[sucesso sem debito]`
+- [x] Pages é CDN (34 obj, `index.json`, não README) — `[sucesso sem debito]`
+- [ ] ERRO E12-href: links do index.html iam a `github.io/obj/…` (404). Fix href `./obj/{sha}` nesta entrega — precisa re-run `actos-cdn`
 - [ ] Sessão: merge só com `merge` / `fim` / `fechar`
 
 ---
