@@ -92,7 +92,8 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `32542510967` | Actions | E9 agent-harness success |
 | `#21177682` | ruleset | E14b anti force-push `actos/fs` |
 | `3a0cac7` | arena | docs alinhados ao metal |
-| *este commit* | arena | plugin ACTOS + skill convert + receita planner |
+| `05d078a` | arena | plugin + skill convert |
+| *este commit* | arena | E12 test: CDN live; fix href basePath |
 
 `actos/fs` vs `main`: ahead cresce; behind cresce quando a `main` ganha trampolim. Behind correcto.
 
@@ -100,10 +101,7 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 ## Próxima actividade
 
-E9/E12/E14b fechados. Plugin + skill `/convert` nesta entrega.
+Sessão a **fechar com merge** do PR #1 (humano pediu).  
+Próximo agente: [`AGENTE-PROXIMO.md`](./AGENTE-PROXIMO.md) em **`main`**.
 
-Agente: `git push && git log` → `npm run loop`.
-
-Aplicar no planner: noutro checkout (não neste ramo Arena).
-
-Não merge. Não force-push `actos/fs`. Não apagar `arena/…`.
+Não force-push `actos/fs`. Não apagar `arena/01a01e33-github-actions`.

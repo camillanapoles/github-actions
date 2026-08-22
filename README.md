@@ -16,7 +16,10 @@ depois de read/write        →  regras no path
 
 Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-actions/pull/1
 
-- **Estado / pendências:** [`docs/ROADMAP.md`](docs/ROADMAP.md) — F0–F6 + E9/E12/E14b **no metal**
+- **HOW TO (qual ramo / clonar / converter):** [`docs/HOWTO.md`](docs/HOWTO.md)
+- **Próximo agente:** [`docs/AGENTE-PROXIMO.md`](docs/AGENTE-PROXIMO.md)
+- Exemplos de uso: [`examples/`](examples/)
+- **Estado:** [`docs/ROADMAP.md`](docs/ROADMAP.md) — F0–F6 + E9/E12/E14b **no metal**
 - Ahead (checklist): [`docs/AHEAD.md`](docs/AHEAD.md)
 - Audit: [`docs/audit.md`](docs/audit.md)
 - Plano (GitHub = FS + memória + CDN): [`docs/plan-github-os.md`](docs/plan-github-os.md)
@@ -301,11 +304,4 @@ Ciclo: `queued → in_runtime → resolved → cached`.
 
 Isto **não vive só no commit**. A UI, o comentário do PR e o summary da Action dizem o mesmo.
 
-Se quiseres **continuar**:
-
-1. **Não faças merge ainda.** Deixa o PR aberto.
-2. O agente faz **commit e push só** para `arena/<sessao>`.
-3. O PR atualiza sozinho.
-4. **Fim** só se disseres claramente: `merge`, `fim`, `fechar`.
-
-Merge **não** apaga a sessão. Apagar o ramo `arena/…` é que a perde. Ver `harness/rules/arena-session.md`.
+Esta sessão **fechou com merge** do PR #1 (pedido explícito). Trabalho novo: ramo `main` ou `arena/<nova-sessao>` a partir de `main`. **Não apagues** `arena/01a01e33-github-actions`. Ver `docs/AGENTE-PROXIMO.md`.
