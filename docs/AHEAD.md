@@ -51,7 +51,9 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 - [x] E17 tags `actos/obj/*` no origin (13) — `[sucesso sem debito]`
 - [x] CPU local `smoke cpu github` → L3 `62ad489` — `[sucesso sem debito]`
 - [x] Skill `/loop` CI `b8f7e3b` 15s → success `32532886761` — `[sucesso sem debito]`
-- [x] E18 `read()` projecta L3 no ENOENT; `drain` retoma `sliced` — nesta entrega
+- [x] E18 `read()` projecta L3 no ENOENT; `drain` retoma `sliced` — `[sucesso sem debito]`
+- [x] E12 deploy `actos-cdn` 2× success (`32534221522`, `32537827431`) — `[sucesso sem debito]`
+- [x] GC schedule append `/proc/stat` → `aae4abf` — `[sucesso sem debito]`
 
 ---
 
@@ -59,7 +61,7 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 - [ ] E9 runner GitHub
   - [ ] ERRO E9-dispatch: `gh workflow run` 403. Fazer: Run workflow na UI.
-- [ ] E12 Pages: Settings → Pages → Source **GitHub Actions** · Run `actos-cdn`
+- [ ] E12 live: confirmar no browser `https://camillanapoles.github.io/github-actions/index.json` (API Pages ainda diz source `main /`; deploy-pages já correu)
 - [ ] E14b ruleset
   - [ ] ERRO E14b: rulesets 403. Fazer: humano cria `actos-fs-append-only`.
 - [ ] ERRO CodeQL-actions no PR: esperado (sem YAML no arena).
@@ -84,7 +86,9 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `62ad489` | actos/fs | smoke cpu github + /proc/stat (disco vivo) |
 | `b9adf38` | arena | /loop RETURN; E17 tags; L3 avançou |
 | `262d395` | main | feat: actos-cdn pages trampoline (humano E12b) |
-| *este commit* | arena | E10 fechado; E18 read-through + drain sliced |
+| `6fd38b3` | arena | E10 fechado; E18 read-through + drain sliced |
+| `aae4abf` | actos/fs | GC `/proc/stat` (disco a crescer sozinho) |
+| *este commit* | arena | ROADMAP + E12 deploy marcado |
 
 `actos/fs` vs `main`: ahead cresce; behind cresce quando a `main` ganha trampolim. Behind correcto.
 
@@ -92,18 +96,12 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 ## Próxima actividade
 
-Disco vivo (`62ad489`). `/loop` no CI deste commit. Depois: E12 export local se o trampolim Pages ainda não existir.
+Ver [`ROADMAP.md`](./ROADMAP.md). Agente: `git push && git log` → `npm run loop`.
 
-Humano:
+Humano (3 cliques — o resto do OS já está):
 
-```bash
-git checkout main && git pull
-git checkout origin/arena/01a01e33-github-actions -- harness/bootstrap-main
-cp harness/bootstrap-main/*.yml .github/workflows/
-git add .github/workflows && git commit -m "feat: actos-cdn pages trampoline" && git push
-git checkout arena/01a01e33-github-actions
-```
-
-+ E10 Read and write · E9 Run `agent-harness` · E14b ruleset.
+1. **E9** Actions → **agent-harness** → Run → `smoke cpu github`
+2. **E12 live** Settings → Pages → Source **GitHub Actions** se o site ainda for o README
+3. **E14b** Ruleset `actos-fs-append-only` em `actos/fs`
 
 Não merge. Não force-push `actos/fs`. Não apagar `arena/…`.
