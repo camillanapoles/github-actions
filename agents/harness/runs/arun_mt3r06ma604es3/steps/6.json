@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3r06ma604es3_s6",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/6",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 6,
+    "name": "act/Escrever objetos (pattern + id)",
+    "uses": "kernel.write",
+    "status": "ok",
+    "input": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "with": {}
+    },
+    "output": {
+      "path": "/objects/goal-result/goal_mt3r06njsp6l2v",
+      "id": "goal_mt3r06njsp6l2v"
+    },
+    "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/6",
+    "at": "2026-08-22T02:17:34.689Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
