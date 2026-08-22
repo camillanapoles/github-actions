@@ -1,0 +1,24 @@
+{
+  "id": "arun_mt3t372xb8pwye_s9",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3t372xb8pwye/steps/9",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 9,
+    "name": "resolve/Cachear resultado",
+    "uses": "kernel.cache.put",
+    "status": "ok",
+    "input": {
+      "goal": "npm run cdn:export",
+      "with": {}
+    },
+    "output": {
+      "cacheKey": "e0dc8322c3161a69f6bd365b50add173ca60fe18218efdc3552e9ad47186c292"
+    },
+    "path": "/agents/harness/runs/arun_mt3t372xb8pwye/steps/9",
+    "at": "2026-08-22T03:15:54.518Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
