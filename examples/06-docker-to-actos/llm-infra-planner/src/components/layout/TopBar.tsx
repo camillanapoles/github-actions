@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { Moon, Sun, Keyboard, Github, Menu, X } from 'lucide-react';
 import { useTheme } from '@/lib/use-theme';
 import { cn } from '@/lib/utils';
@@ -43,12 +44,12 @@ export function TopBar({ currentPath = '/', onOpenShortcuts }: TopBarProps) {
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-1 ml-4" aria-label="Main navigation">
           {NAV_LINKS.map(link => (
-            <a key={link.href} href={link.href}
+            <Link key={link.href} to={link.href}
               className={cn('text-sm px-2.5 py-1.5 rounded-md transition-colors duration-fast',
                 currentPath === link.href ? 'text-fg-primary bg-bg-muted' : 'text-fg-muted hover:text-fg-primary hover:bg-bg-muted')}
               aria-current={currentPath === link.href ? 'page' : undefined}>
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -83,12 +84,12 @@ export function TopBar({ currentPath = '/', onOpenShortcuts }: TopBarProps) {
       {mobileMenuOpen && (
         <nav id="mobile-nav" className="lg:hidden fixed top-12 left-0 right-0 z-[19] bg-bg-base border-b border-border-subtle px-4 py-3 flex flex-col gap-1" aria-label="Mobile navigation">
           {NAV_LINKS.map(link => (
-            <a key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)}
+            <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}
               className={cn('text-sm px-3 py-2.5 rounded-md transition-colors min-h-[44px] flex items-center',
                 currentPath === link.href ? 'text-fg-primary bg-bg-muted font-medium' : 'text-fg-muted hover:text-fg-primary hover:bg-bg-muted')}
               aria-current={currentPath === link.href ? 'page' : undefined}>
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
       )}
