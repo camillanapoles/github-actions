@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3r06ma604es3_s1",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/1",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 1,
+    "name": "plan/Inspecionar espaço único",
+    "uses": "kernel.ps",
+    "status": "ok",
+    "input": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "with": {}
+    },
+    "output": {
+      "processes": 1,
+      "space": "unique-runtime"
+    },
+    "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/1",
+    "at": "2026-08-22T02:17:34.630Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
