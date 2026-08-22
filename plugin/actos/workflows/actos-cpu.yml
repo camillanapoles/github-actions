@@ -1,0 +1,69 @@
+# Drop-in CPU. Copia para .github/workflows/ no projecto alvo.
+# NÃO uses docker compose / docker build aqui — o runner é o CPU.
+#
+# Inputs:
+#   cmd   — comando a correr (default: npm test && npm run build)
+#   kind  — kind do objecto persistido
+
+name: actos-cpu
+
+on:
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: Comando CPU (sem docker)
+        default: npm test && npm run build
+        type: string
+      kind:
+        default: execution
+        type: string
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    env:
+      NODE_NO_WARNINGS: "1"
+      ACTOS_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: CPU (not Docker)
+        run: |
+          set -euo pipefail
+          PLUGIN="${GITHUB_WORKSPACE}/.actos-plugin"
+          if [[ ! -f "$PLUGIN/bin/actos-persist.mjs" ]]; then
+            echo "plugin ausente — corre scripts/install-actos-plugin.sh no repo alvo"
+            eval "${{ github.event.inputs.cmd || 'npm test && npm run build' }}"
+            mkdir -p data/objects/objects/execution
+            node -e "
+              const fs=require('fs');
+              const id=process.env.GITHUB_RUN_ID;
+              const o={id,kind:'execution',path:'/objects/execution/'+id,pattern:'/objects/{kind}/{id}',payload:{sha:process.env.GITHUB_SHA,repo:process.env.GITHUB_REPOSITORY}};
+              fs.writeFileSync('data/objects/objects/execution/'+id+'.json', JSON.stringify(o,null,2));
+            "
+            exit 0
+          fi
+          bash "$PLUGIN/bin/actos-wrap.sh" --kind "${{ github.event.inputs.kind || 'execution' }}" --id "$GITHUB_RUN_ID" -- \
+            bash -lc "${{ github.event.inputs.cmd || 'npm test && npm run build' }}"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: actos-objects-${{ github.run_id }}
+          path: data/objects/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Ingest hub (optional)
+        env:
+          ACTOS_INGEST_URL: ${{ secrets.ACTOS_INGEST_URL }}
+          ACTOS_INGEST_TOKEN: ${{ secrets.ACTOS_INGEST_TOKEN }}
+        run: bash .actos-plugin/bin/actos-ingest.sh

@@ -61,6 +61,7 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 - [x] E9 · E12 · E14b — validados 2026-08-22
 - [ ] E11 CodeQL *actions* no PR: **esperado**, não é débito do OS
+- [x] Plugin + skill `/convert` + receita `llm-infra-planner` — nesta entrega
 - [ ] Sessão: merge só com `merge` / `fim` / `fechar`
 
 ---
@@ -88,7 +89,8 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `35e1b79` | arena | ROADMAP inicial |
 | `32542510967` | Actions | E9 agent-harness success |
 | `#21177682` | ruleset | E14b anti force-push `actos/fs` |
-| *este commit* | arena | docs: plano/README/pendências alinhados ao metal |
+| `3a0cac7` | arena | docs alinhados ao metal |
+| *este commit* | arena | plugin ACTOS + skill convert + receita planner |
 
 `actos/fs` vs `main`: ahead cresce; behind cresce quando a `main` ganha trampolim. Behind correcto.
 
@@ -96,12 +98,10 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 ## Próxima actividade
 
-Ver [`ROADMAP.md`](./ROADMAP.md). Agente: `git push && git log` → `npm run loop`.
+E9/E12/E14b fechados. Plugin + skill `/convert` nesta entrega.
 
-Humano (3 cliques — o resto do OS já está):
+Agente: `git push && git log` → `npm run loop`.
 
-1. **E9** Actions → **agent-harness** → Run → `smoke cpu github`
-2. **E12 live** Settings → Pages → Source **GitHub Actions** se o site ainda for o README
-3. **E14b** Ruleset `actos-fs-append-only` em `actos/fs`
+Aplicar no planner: noutro checkout (não neste ramo Arena).
 
 Não merge. Não force-push `actos/fs`. Não apagar `arena/…`.

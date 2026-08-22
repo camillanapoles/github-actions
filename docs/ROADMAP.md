@@ -64,6 +64,8 @@ E9  E12  E14b ████  validados 2026-08-22
 
 Não há F7 no plano original. O produto descrito em F0–F6 está no metal.
 
+**Converter outros repos:** [`docs/CONVERTER.md`](./CONVERTER.md) · plugin [`plugin/actos/`](../plugin/actos/) · skill [`harness/skills/convert.md`](../harness/skills/convert.md). Caso: `camillanapoles/llm-infra-planner` (Docker só serve SPA; CPU = `npx tsx` no runner).
+
 ## Como o agente trabalha
 
 1. Commit no `arena/` · `git push && git log`

@@ -120,11 +120,19 @@ Base: `data/actos.db`. Object files (disco analog): `data/objects/**`. Ambos est
 
 ## 3. Usar com **outros** projetos
 
-ACTOS não precisa de ser a app inteira do outro repo. Há três níveis de integração, do mais leve ao mais fundo.
+**Converter** um repo (ex. [llm-infra-planner](https://github.com/camillanapoles/llm-infra-planner)) para o nosso modelo: o CPU deixa de ser Docker e passa a ser o **runner**, o resultado vira objecto `pattern+id`.
 
-### Nível A — só o workflow (outro repo GitHub)
+```bash
+bash plugin/actos/install.sh /path/to/outro-repo
+```
 
-Copia `harness/github/` para `.github/workflows/` no projeto alvo.
+Instruções: [`docs/CONVERTER.md`](docs/CONVERTER.md) · plugin: [`plugin/actos/`](plugin/actos/) · skill agente: [`harness/skills/convert.md`](harness/skills/convert.md).
+
+ACTOS não precisa de ser a app inteira do outro repo. Três níveis:
+
+### Nível A — plugin (recomendado)
+
+Copia `.actos-plugin` + `actos-cpu.yml`. Sem Next, sem kernel.
 
 ```
 projeto-alvo/

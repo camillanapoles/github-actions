@@ -19,7 +19,8 @@
     "cdn:export": "npx tsx src/cli/cdn-export.ts",
     "test": "node --import tsx --test src/domain/*.test.ts src/invariants.test.ts",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts",
-    "loop": "bash scripts/loop-action.sh"
+    "loop": "bash scripts/loop-action.sh",
+    "plugin:install": "bash plugin/actos/install.sh"
   },
   "dependencies": {
     "next": "^15.1.7",
