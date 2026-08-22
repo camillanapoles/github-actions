@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3r06ma604es3_s7",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/7",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 7,
+    "name": "resolve/Resolver execução → objeto",
+    "uses": "kernel.resolve",
+    "status": "ok",
+    "input": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "with": {}
+    },
+    "output": {
+      "pending": true,
+      "executionId": "ex_mt3r06mab5kqnz"
+    },
+    "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/7",
+    "at": "2026-08-22T02:17:34.689Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
