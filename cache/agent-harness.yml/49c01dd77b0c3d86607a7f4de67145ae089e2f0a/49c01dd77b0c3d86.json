@@ -5,7 +5,7 @@
   "pattern": "/cache/{workflow}/{sha}/{id}",
   "payload": {
     "hit": true,
-    "executionId": "ex_mt3iqczwo77a36",
+    "executionId": "ex_mt3oixy09489fb",
     "workflow": "agent-harness.yml",
     "sha": "49c01dd77b0c3d86607a7f4de67145ae089e2f0a",
     "cacheKey": "49c01dd77b0c3d86607a7f4de67145ae089e2f0a3eff50918cca07c8b7cb04f4",
@@ -15,7 +15,7 @@
         "id": "harness",
         "name": "agentic-harness",
         "status": "completed",
-        "startedAt": "2026-08-21T22:25:59.382Z",
+        "startedAt": "2026-08-22T01:08:10.972Z",
         "steps": [
           {
             "name": "plan/Inspecionar espaço único",
@@ -64,7 +64,7 @@
           }
         ],
         "conclusion": "success",
-        "finishedAt": "2026-08-21T22:25:59.981Z"
+        "finishedAt": "2026-08-22T01:08:11.570Z"
       }
     ]
   },
