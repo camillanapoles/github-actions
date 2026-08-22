@@ -170,9 +170,9 @@ Audit + este plano. PR aberto. Sem merge.
 
 Entrega: HIT real no mesmo goal; page async inalterada.
 
-### F2 — Git como L3 (o FS) — **parcial** (ramo existe; vivo só após E7)
+### F2 — Git como L3 (o FS) — **feito** no metal (`actos/fs` vivo, append)
 
-Ver [`EVOLUCOES.md`](./EVOLUCOES.md): 14 ahead / 5 behind é facto. Ahead tem de **crescer**. Behind tem de **manter-se**.
+Ver [`EVOLUCOES.md`](./EVOLUCOES.md): o compare órfão vs `main` é facto. Ahead tem de **crescer**. Behind tem de **manter-se**.
 
 ### F2 (código) — Git como L3
 
@@ -195,28 +195,19 @@ Entrega: o disco **é** um ramo git. Push para origin quando o remoto aceitar `a
 
 Entrega: lookup L1 → SQLite/L3; L1 nunca é origem.
 
-### F4 — CPU event-driven (agent as job) — **parcial neste ramo**
+### F4 — CPU event-driven (agent as job) — **feito** no metal (2026-08-22)
 
 - `src/domain/irq.ts` — IRQ persistente (`data/irq.jsonl`).
-- `enqueueAgent` emite `repository_dispatch` payload `{ event_type: "agent.run", client_payload }`.
-- `GET/POST /api/irq`. CPU continua `drain` / Action.
-- Testes de validação/sucesso: `npm test`.
-
-Ainda falta copiar YAML para `.github/workflows/` na default branch (token sem `workflows`).
-
-- YAML em `.github/workflows/` (cópia única para `main`).
-- `POST /api/agents/run` → `repository_dispatch` `actos.syscall`.
-- Slice: se o job aproxima timeout, checkpoint L3 + dispatch `actos.slice`.
-- `workflow_run` → persist (já esboçado em `runtime-persist.yml`).
+- YAML na `main` (trampolim). `agent-harness` run **32542510967** success.
+- Slice: `checkpoint()` + `status=sliced` + `actos.slice`. `drain` retoma.
 
 Entrega: o request HTTP não é o processo. O runner é.
 
-### F5 — CDN público + regras — **feito** (árvore local; Pages é acção humana)
+### F5 — CDN público + regras — **feito** no metal (Pages = GitHub Actions)
 
 - `src/domain/public-cdn.ts` — deny some, redact secrets, skip `/runtime` `/sys` `/agents`.
-- URLs: imutável `obj/{sha}.json` + estável `{path}.json`. Purge = reexport.
-- CLI `npm run cdn:export`, UI `/publico`, `GET /api/publico`.
-- GitHub Pages na `main` continua a ser a tua acção (igual aos workflows) — ver `docs/ACAO-HUMANA.md`.
+- URLs: imutável `obj/{sha}.json` + estável `{path}.json`.
+- `actos-cdn` deploy-pages success. Pages `build_type: workflow`.
 
 ### F6 — multi-repo (Nível C) — **feito** neste ramo
 

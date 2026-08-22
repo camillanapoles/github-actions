@@ -41,12 +41,12 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 - [x] E14 `tagCas` idempotente (testes isolados) — `[sucesso sem debito]`
 - [x] E15 `hydrateFromL3` (testes isolados) — `[sucesso sem debito]`
 - [x] E8b trampolim `actos.slice` → `main` `8a231b3` — `[sucesso sem debito]`
-- [ ] E9 runner GitHub (0 runs; analog local feito)
-- [x] E10 permissions — YAML + setting. Humano: *já fizemos; era o YAML sem permissions* — `[sucesso sem debito]`
-- [ ] E11 CodeQL *actions* no PR (falha esperada sem YAML no arena)
+- [x] E9 `agent-harness` dispatch success `32542510967` — `[sucesso sem debito]`
+- [x] E10 permissions — YAML + setting — `[sucesso sem debito]`
+- [ ] E11 CodeQL *actions* no PR (esperado; sem YAML no arena)
 - [x] E12b trampolim `cdn-pages.yml` → `main` `262d395` — `[sucesso sem debito]`
-- [ ] E12 Pages a servir `.actos-cdn` (workflow `actos-cdn` ainda 0 runs)
-- [ ] E14b ruleset anti force-push em `actos/fs`
+- [x] E12 Pages `build_type=workflow` + `actos-cdn` success — `[sucesso sem debito]`
+- [x] E14b ruleset `anti force-push em actos/fs` #21177682 — `[sucesso sem debito]`
 - [x] E16 CI `d9a9ede` / `0442cac` / `b8f7e3b` verde — `[sucesso sem debito]`
 - [x] E17 tags `actos/obj/*` no origin (13) — `[sucesso sem debito]`
 - [x] CPU local `smoke cpu github` → L3 `62ad489` — `[sucesso sem debito]`
@@ -59,12 +59,9 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 
 ## Todolist
 
-- [ ] E9 runner GitHub
-  - [ ] ERRO E9-dispatch: `gh workflow run` 403. Fazer: Run workflow na UI.
-- [ ] E12 live: confirmar no browser `https://camillanapoles.github.io/github-actions/index.json` (API Pages ainda diz source `main /`; deploy-pages já correu)
-- [ ] E14b ruleset
-  - [ ] ERRO E14b: rulesets 403. Fazer: humano cria `actos-fs-append-only`.
-- [ ] ERRO CodeQL-actions no PR: esperado (sem YAML no arena).
+- [x] E9 · E12 · E14b — validados 2026-08-22
+- [ ] E11 CodeQL *actions* no PR: **esperado**, não é débito do OS
+- [ ] Sessão: merge só com `merge` / `fim` / `fechar`
 
 ---
 
@@ -88,7 +85,10 @@ Marcador canónico de fecho: ``[sucesso sem debito]``.
 | `262d395` | main | feat: actos-cdn pages trampoline (humano E12b) |
 | `6fd38b3` | arena | E10 fechado; E18 read-through + drain sliced |
 | `aae4abf` | actos/fs | GC `/proc/stat` (disco a crescer sozinho) |
-| *este commit* | arena | ROADMAP + E12 deploy marcado |
+| `35e1b79` | arena | ROADMAP inicial |
+| `32542510967` | Actions | E9 agent-harness success |
+| `#21177682` | ruleset | E14b anti force-push `actos/fs` |
+| *este commit* | arena | docs: plano/README/pendências alinhados ao metal |
 
 `actos/fs` vs `main`: ahead cresce; behind cresce quando a `main` ganha trampolim. Behind correcto.
 

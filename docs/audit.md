@@ -1,6 +1,8 @@
 # Audit de arquitectura — ACTOS
 
-Data: 2026-08-21 · tag: `arena-agent` · ramo: `arena/01a01e33-github-actions`
+Data: 2026-08-22 · tag: `arena-agent` · ramo: `arena/01a01e33-github-actions`
+
+**Addendum:** F0–F6 + E9/E12/E14b validados no metal. Este audit descreve o corte de 21 ago; o estado vivo está em [`ROADMAP.md`](./ROADMAP.md).
 
 ## Veredito
 

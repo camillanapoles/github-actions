@@ -16,6 +16,8 @@ depois de read/write        →  regras no path
 
 Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-actions/pull/1
 
+- **Estado / pendências:** [`docs/ROADMAP.md`](docs/ROADMAP.md) — F0–F6 + E9/E12/E14b **no metal**
+- Ahead (checklist): [`docs/AHEAD.md`](docs/AHEAD.md)
 - Audit: [`docs/audit.md`](docs/audit.md)
 - Plano (GitHub = FS + memória + CDN): [`docs/plan-github-os.md`](docs/plan-github-os.md)
 - Puter.js → camadas FS: [`docs/puter-insights.md`](docs/puter-insights.md)
@@ -50,7 +52,7 @@ Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-
 
 ## 2. Instruções de uso (este repo)
 
-Requisitos: Node.js 22+ (usa `node:sqlite`).
+Requisitos: Node.js **20+**. No 20 usa FileDb; no 22+ usa `node:sqlite` se existir.
 
 ```bash
 git clone https://github.com/camillanapoles/github-actions.git
@@ -68,6 +70,9 @@ npm run dev           # UI em http://localhost:3000  (0.0.0.0)
 | `/runtime` | espaço único (`ps` / `fork`) |
 | `/execucoes` | execuções cacheadas das Actions |
 | `/objetos` | object store; click abre `/objetos{path}` |
+| `/disco` | L3 `actos/fs` (`ls-tree`) |
+| `/cdn` | camadas L1/L2/L3 |
+| `/publico` | export CDN (redact) |
 | `/agentes` | harness — dispara um **goal** (backend) |
 | `/regras` | ACL no path |
 | `/sys` | consola de syscalls |
@@ -103,8 +108,10 @@ Syscalls úteis: `ps`, `ls`, `read`, `write`, `resolve`, `cache.stat`, `snapshot
 | --- | --- |
 | `npm run dev` | Next.js em `0.0.0.0:3000` |
 | `npm run seed` | (re)popula SQLite se estiveres a partir do zero |
-| `npm run agent` | CLI do harness |
-| `npm run session-notice` | injeta o aviso de sessão no PR (não é commit) |
+| `npm run agent` / `drain` | CLI do harness (CPU) |
+| `npm run fs:push` / `gc` / `cdn:export` | L3 / GC / L4 |
+| `npm run loop` | `/loop` — poll Actions 15s após push |
+| `npm run session-notice` | aviso de sessão no PR (não é commit) |
 | `npm run build` / `start` | produção |
 
 Base: `data/actos.db`. Object files (disco analog): `data/objects/**`. Ambos estão no `.gitignore`.
@@ -227,7 +234,7 @@ Checklist para um clone fiel:
    Tudo o que ainda corre vive em memória/`runtime_space`, path `/runtime/runs/{id}`. Não misturar com objetos persistidos.
 
 2. **Resolve = objectify**  
-   Quando o job acaba: serializar o payload, `unmount` do runtime, `write` no object store, `cache.put` com chave `actos-{workflow}-{sha}-{hash}`.
+   Quando o job acaba: serializar o payload, `unmount` do runtime, `write` no object store, `cache.put` com chave `sha256(actos/v1 ‖ workflow ‖ goal ‖ extras)`.
 
 3. **Path = pattern + id**  
    Nunca gravar “na tabela solta”. Sempre derivar o path de um pattern conhecido (`src/domain/path.ts`). Depois do write, **regras**.
@@ -242,11 +249,11 @@ Checklist para um clone fiel:
    Tabelas para persistir; API de sistema (`ps`, `fork`, `resolve`, `snapshot`) por cima.
 
 7. **Copiar YAML para `.github/workflows/`**  
-   A fonte neste repo está em `harness/github/` (o token da sessão Arena não consegue criar ficheiros em `.github/workflows`). Noutro repo, com permissão `workflows`, copia:
+   A fonte activa na default branch é `harness/bootstrap-main/` (já copiada para `.github/workflows/` na `main`). Noutro repo:
 
    ```bash
    mkdir -p .github/workflows
-   cp harness/github/*.yml .github/workflows/
+   cp harness/bootstrap-main/*.yml .github/workflows/
    ```
 
 ### Mapa de ficheiros

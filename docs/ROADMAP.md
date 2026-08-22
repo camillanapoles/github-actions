@@ -1,6 +1,7 @@
 # ACTOS — o que é, o que está feito, o que falta
 
 Sessão `arena/01a01e33-github-actions` · PR #1 **aberto** · sem merge.
+Plano original: [`plan-github-os.md`](./plan-github-os.md).
 
 ## O que estamos a criar
 
@@ -24,54 +25,47 @@ Invariante: **HTTP só enfileira. O processo é o runner. Depois do resolve, tud
 Três ramos, três papéis (não misturar):
 
 - `arena/01a01e33-github-actions` — código do kernel (esta sessão)
-- `main` — trampolim YAML (tu copias; o token Arena não escreve workflows)
-- `actos/fs` — disco (órfão, ahead cresce, behind da `main` mantém-se)
+- `main` — trampolim YAML
+- `actos/fs` — disco (órfão; ahead cresce; behind da `main` mantém-se)
 
 ## Caminhámos quanto?
 
-Kernel + disco + CI + CDN deploy: **feito**.  
-CPU no *runner* GitHub e ruleset: **faltam 2 cliques teus**.  
-Não há F7 no plano original. O que resta é metal que a App **não pode** disparar (403).
+O plano F0–F6 + evoluções E7–E18 **no metal está fechado**.
 
 ```
 F0 ████████  plano
 F1 ████████  CAS + journal + enqueue≠CPU
-F2 ████████  GitFs L3 vivo (aae4abf)
-F3 ████████  L1/L2 + GC (schedule escreve /proc/stat)
-F4 ██████░░  IRQ + slice no kernel; YAML na main; 0 runs do harness
-F5 ███████░  export + deploy-pages success; URL a confirmar no browser
+F2 ████████  GitFs L3 vivo (`548f964`+)
+F3 ████████  L1/L2 + GC schedule (append /proc/stat)
+F4 ████████  IRQ + slice + agent-harness no runner (run 32542510967)
+F5 ████████  actos-cdn deploy-pages · Pages build_type=workflow
 F6 ████████  ingest multi-repo
 E7–E18 ████  attach, FileDb CI, /loop, tags, hydrate, read-through
+E9  E12  E14b ████  validados 2026-08-22
 ```
 
-## Já realizado (`[sucesso sem debito]`)
+## Validado no metal (2026-08-22)
 
-- Kernel Next 15 / React 19, pages `/runtime` `/objetos` `/disco` `/cdn` `/publico` `/agentes`
-- CAS `sha256`, journal, FileDb no Node 20, **CI verde** (último `6fd38b3` run 32533381497)
-- `actos/fs` vivo: smoke F2 → `/proc/stat` → `smoke cpu github` → GC a appendir (`aae4abf`)
-- 13+ tags `actos/obj/{sha}`
-- Trampolim na `main`: `ci` `agent-harness` `gc` `cdn-pages` (`262d395`)
-- `actos-cdn` **2× success** (hydrate L3 → artifact → `deploy-pages`)
-- Skill `/loop`: `git push && git log` → while 15s → RETURN → seguinte
-- E10: era YAML sem `permissions`, não a setting
+| Id | Evidência |
+| --- | --- |
+| **E9** | `agent-harness` `workflow_dispatch` **success** [32542510967](https://github.com/camillanapoles/github-actions/actions/runs/32542510967) |
+| **E12** | `actos-cdn` 3× success; Pages `build_type: workflow` · https://camillanapoles.github.io/github-actions/ |
+| **E14b** | ruleset `anti force-push em actos/fs` **active** (#21177682) — `deletion` + `non_fast_forward` em `actos/fs**` |
+| **E10** | YAML `permissions` + setting Read and write |
+| CI | verde em cadeia até `35e1b79` / `6fd38b3` |
 
-## O que falta (só metal / UI GitHub)
+## Pendências reais (não são débito do OS)
 
-| Id | O quê | Quem | Bloqueio |
-| --- | --- | --- | --- |
-| **E9** | Actions → **agent-harness** → Run → `smoke cpu github` | tu | App `workflow_dispatch` **403** |
-| **E12 live** | Abrir https://camillanapoles.github.io/github-actions/ e confirmar `index.json` (não só o README da `main`) | tu | Settings → Pages → Source **GitHub Actions** se ainda estiver `main /` |
-| **E14b** | Ruleset `actos-fs-append-only` (block force-push + delete) | tu | App rulesets **403** |
-| E11 | CodeQL *actions* no PR | ignorar | sem YAML no `arena/` |
+| Item | Natureza |
+| --- | --- |
+| CodeQL *Analyze (actions)* no PR #1 | **esperado**: o `arena/` não tem `.github/workflows/` (token Arena sem `workflows`). Scan que conta = push à `main`. |
+| PR #1 aberto | política de sessão. Fecha só com `merge` / `fim` / `fechar`. |
+| L5 Releases | opcional no plano; não pedido. |
 
-Analog local do E9 **já correu**. O runner GitHub ainda não.
+Não há F7 no plano original. O produto descrito em F0–F6 está no metal.
 
-## Como o agente trabalha daqui para a frente
+## Como o agente trabalha
 
 1. Commit no `arena/` · `git push && git log`
 2. `npm run loop` — 15s até o CI desse SHA devolver
 3. Marca AHEAD · actividade seguinte
-4. Não para à espera do próximo turno teu — mas **não inventa** `workflow_dispatch`
-
-Fim do *produto* nesta sessão: E9 + Pages a servir o CDN + E14b.  
-Fim da *sessão Arena*: só quando disseres `merge` / `fim` / `fechar`.

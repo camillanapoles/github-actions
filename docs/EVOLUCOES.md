@@ -1,6 +1,11 @@
 # Evoluções — depois do facto 14/5
 
-Data: 2026-08-21 · ramo `arena/01a01e33-github-actions` · PR #1 aberto.
+Data: 2026-08-22 · ramo `arena/01a01e33-github-actions` · PR #1 aberto.
+
+**Estado actual:** F0–F6 + E7–E18 + E9/E12/E14b **validados no metal**.  
+Pendências: só CodeQL *actions* no PR (esperado) e o merge da sessão. Ver [`ROADMAP.md`](./ROADMAP.md).
+
+O texto abaixo é o **journal da auditoria de 21 ago** (disco congelado em 14/5). Não é o estado de hoje.
 
 ## O facto (git é determinista)
 
@@ -64,13 +69,14 @@ Ramos: `main` trampolim · `arena/…` código · `actos/fs` disco. **Não mistu
 | --- | --- | --- |
 | **E7** | `gitfs.attach()` ao origin; `ls`/`read` via `ls-tree`/`show`; recusar non-ff; `/proc/stat`; lookup L3-git; GC `--sync`; trampolim fetch+push **sem** continue-on-error; FileDb filtra literais; testes isolados | **neste commit** |
 | **E8** | trampolim na `main` | **`[sucesso sem debito]`** `38e6393` |
-| **E9** | Actions → `agent-harness` → Run `smoke cpu github` | bloqueado em ti |
-| **E10** | Settings → Actions → **Read and write** | bloqueado em ti |
-| **E11** | CodeQL actions no PR | opcional / fail esperado |
-| **E12** | Pages → `.actos-cdn` | humano |
-| **E13** | slice YAML + `status=sliced` + `--slice` | nesta entrega |
-| **E14** | tags `actos/obj/{sha}` | nesta entrega (local) |
-| **E15** | hydrate `ls-tree` → SQLite | nesta entrega |
+| **E9** | `agent-harness` no runner | `[sucesso sem debito]` run 32542510967 |
+| **E10** | YAML `permissions` + setting | `[sucesso sem debito]` |
+| **E11** | CodeQL actions no PR | esperado / não é débito |
+| **E12** | Pages Actions + `actos-cdn` | `[sucesso sem debito]` `build_type=workflow` |
+| **E13** | slice YAML + `status=sliced` + `--slice` | `[sucesso sem debito]` |
+| **E14** | tags `actos/obj/{sha}` | `[sucesso sem debito]` |
+| **E14b** | ruleset anti force-push | `[sucesso sem debito]` #21177682 |
+| **E15** | hydrate `ls-tree` → SQLite | `[sucesso sem debito]` |
 
 ## O que *não* fazer
 
