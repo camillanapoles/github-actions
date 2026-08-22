@@ -1,0 +1,24 @@
+{
+  "id": "arun_mt3r06ma604es3_s8",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/8",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 8,
+    "name": "resolve/Sair do runtime, persistir em path",
+    "uses": "kernel.unmount",
+    "status": "ok",
+    "input": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "with": {}
+    },
+    "output": {
+      "unmounted": "arun_mt3r06ma604es3"
+    },
+    "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/8",
+    "at": "2026-08-22T02:17:34.689Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
