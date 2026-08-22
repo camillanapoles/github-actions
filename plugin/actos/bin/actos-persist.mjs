@@ -10,6 +10,21 @@
 import fs from "node:fs";
 import path from "node:path";
 
+const USAGE = `uso: node actos-persist.mjs [--kind KIND] [--repo REPO] [--id ID] [--payload JSON | --file F | --stdin]
+
+Escreve data/objects/objects/{repo?}/{kind}/{id}.json. Sem Docker.
+
+exemplos:
+  node actos-persist.mjs --kind execution --id 123 --payload '{"ok":true}'
+  node actos-persist.mjs --kind plan --repo acme/shop --stdin < result.json
+
+--help  mostra este uso e sai (não escreve nada).`;
+
+if (process.argv.includes("--help") || process.argv.includes("-h")) {
+  console.log(USAGE);
+  process.exit(0);
+}
+
 function arg(name, fallback = "") {
   const i = process.argv.indexOf(`--${name}`);
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;

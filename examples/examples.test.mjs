@@ -11,10 +11,50 @@ function run(rel) {
   return spawnSync(process.execPath, [path.join(root, rel)], { cwd: root, encoding: "utf8" });
 }
 
-test("01 hello-cpu persiste objecto namespaced", () => {
+function objectsDir() {
+  return path.join(root, "data", "objects", "objects");
+}
+
+function countObjects() {
+  if (!fs.existsSync(objectsDir())) return 0;
+  let n = 0;
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith(".json")) n += 1;
+    }
+  };
+  walk(objectsDir());
+  return n;
+}
+
+test("actos-persist --help não escreve objectos", () => {
+  const before = countObjects();
+  const h = spawnSync(
+    process.execPath,
+    [path.join(root, "plugin/actos/bin/actos-persist.mjs"), "--help"],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.equal(h.status, 0, h.stderr);
+  assert.match(h.stdout, /uso:/);
+  assert.doesNotMatch(h.stdout, /actos-persist\]/);
+  assert.equal(countObjects(), before);
+});
+
+test("01 hello-cpu persiste objecto namespaced e válido", () => {
   const r = run("examples/01-hello-cpu/run.mjs");
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /\/objects\/example--hello\/hello\//);
+  const line = r.stdout.split("\n").find((l) => l.startsWith("{"));
+  const out = JSON.parse(line);
+  const file = out.file;
+  assert.ok(fs.existsSync(file), `objecto devia existir: ${file}`);
+  const obj = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(obj.kind, "hello");
+  assert.equal(obj.path, out.path);
+  assert.ok(obj.payload && typeof obj.payload === "object");
+  assert.ok(obj.payload.msg || obj.payload.repo);
 });
 
 test("02 test-suite persiste kind=test", () => {
