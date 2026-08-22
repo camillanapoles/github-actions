@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3sdf8pcgm7sl_s7",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3sdf8pcgm7sl/steps/7",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 7,
+    "name": "resolve/Resolver execução → objeto",
+    "uses": "kernel.resolve",
+    "status": "ok",
+    "input": {
+      "goal": "npm run cdn:export",
+      "with": {}
+    },
+    "output": {
+      "pending": true,
+      "executionId": "ex_mt3sdf8pj1z9sr"
+    },
+    "path": "/agents/harness/runs/arun_mt3sdf8pcgm7sl/steps/7",
+    "at": "2026-08-22T02:55:52.011Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
