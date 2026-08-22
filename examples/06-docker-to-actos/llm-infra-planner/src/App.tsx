@@ -13,6 +13,13 @@ import { useCalculatorStore } from '@/store/calculator-store';
 import { useToast } from '@/components/feedback/Toast';
 import { useKeyboardShortcuts } from '@/lib/use-keyboard-shortcuts';
 
+// A SPA é publicada como subdiretório da GitHub Pages do hub ACTOS
+// (https://camillanapoles.github.io/github-actions/llm-infra-planner/).
+// Sem basename, o BrowserRouter não faz match da rota "/" neste path e a
+// calculadora não renderiza (só o shell). Deep links funcionam porque a
+// GitHub Pages serve 404.html (= index.html) para paths desconhecidos.
+const ROUTER_BASENAME = '/github-actions/llm-infra-planner';
+
 function AppContent() {
   const location = useLocation();
   const { getShareURL, addCompareConfig, compareConfigs } = useCalculatorStore();
@@ -91,7 +98,7 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={ROUTER_BASENAME}>
       <AppContent />
     </BrowserRouter>
   );
