@@ -1,0 +1,24 @@
+{
+  "id": "arun_mt3r06ma604es3_s9",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/9",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 9,
+    "name": "resolve/Cachear resultado",
+    "uses": "kernel.cache.put",
+    "status": "ok",
+    "input": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "with": {}
+    },
+    "output": {
+      "cacheKey": "55b22daf89cb7fe4cfa3187490de62da2e03ce0ea071e98797db83399a7fb408"
+    },
+    "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/9",
+    "at": "2026-08-22T02:17:34.689Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
