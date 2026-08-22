@@ -1,0 +1,31 @@
+{
+  "id": "arun_mt3t372xb8pwye_s2",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3t372xb8pwye/steps/2",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 2,
+    "name": "plan/Ler memória (objetos permitidos)",
+    "uses": "kernel.ls",
+    "status": "ok",
+    "input": {
+      "goal": "npm run cdn:export",
+      "with": {
+        "prefix": "/objects"
+      }
+    },
+    "output": {
+      "objects": 24,
+      "memoryPaths": [
+        "/objects",
+        "/cache",
+        "/runtime"
+      ]
+    },
+    "path": "/agents/harness/runs/arun_mt3t372xb8pwye/steps/2",
+    "at": "2026-08-22T03:15:54.455Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
