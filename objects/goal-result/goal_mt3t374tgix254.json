@@ -1,0 +1,34 @@
+{
+  "id": "goal_mt3t374tgix254",
+  "kind": "goal-result",
+  "path": "/objects/goal-result/goal_mt3t374tgix254",
+  "pattern": "/objects/{kind}/{id}",
+  "payload": {
+    "goal": "npm run cdn:export",
+    "plan": {
+      "goal": "npm run cdn:export",
+      "strategy": "workflow-backed (GitHub Action analog)",
+      "actions": [
+        "kernel.ps",
+        "kernel.write",
+        "kernel.resolve"
+      ]
+    },
+    "act": {
+      "summary": "Goal \"npm run cdn:export\" observado no kernel.",
+      "cachedExecutions": 11,
+      "runtimeProcesses": 1,
+      "objectIndex": {
+        "rule-doc": 1,
+        "goal-result": 5,
+        "execution": 17,
+        "manifest": 1
+      }
+    }
+  },
+  "metadata": {
+    "agent": "harness",
+    "runId": "arun_mt3t372xb8pwye",
+    "rule": "allow-objects"
+  }
+}
