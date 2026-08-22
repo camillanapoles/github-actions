@@ -2,7 +2,7 @@
 
 O token Arena **não escreve** `.github/workflows/`. Tu copiaste o trampolim para a `main`. **Já está feito.**
 
-Isto **não é merge**. O PR #1 fica aberto até `merge` / `fim` / `fechar`.
+**PR #1: merged** (2026-08-20). A `main` tem kernel + plugin + `examples/` + trampolim.
 
 ## Validado (não voltar a copiar à toa)
 
@@ -26,7 +26,6 @@ git checkout arena/01a01e33-github-actions
 
 ## O que **não** faças
 
-- Merge do [PR #1](https://github.com/camillanapoles/github-actions/pull/1) sem dizer `merge` / `fim`
-- Apagar `arena/01a01e33-github-actions`
+- Apagar `arena/01a01e33-github-actions` (histórico da sessão)
 - Force-push `actos/fs`
 - Usar `main` como VFS

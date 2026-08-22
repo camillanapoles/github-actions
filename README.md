@@ -17,6 +17,7 @@ depois de read/write        →  regras no path
 Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-actions/pull/1
 
 - **HOW TO (qual ramo / clonar / converter):** [`docs/HOWTO.md`](docs/HOWTO.md)
+- **Converter outro repo:** [`docs/CONVERTER.md`](docs/CONVERTER.md) · plugin: [`plugin/actos/`](plugin/actos/)
 - **Próximo agente:** [`docs/AGENTE-PROXIMO.md`](docs/AGENTE-PROXIMO.md)
 - Exemplos de uso: [`examples/`](examples/)
 - **Estado:** [`docs/ROADMAP.md`](docs/ROADMAP.md) — F0–F6 + E9/E12/E14b **no metal**
