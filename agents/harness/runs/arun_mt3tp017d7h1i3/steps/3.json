@@ -1,0 +1,30 @@
+{
+  "id": "arun_mt3tp017d7h1i3_s3",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3tp017d7h1i3/steps/3",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 3,
+    "name": "plan/Planejar a partir do goal",
+    "uses": "agent.plan",
+    "status": "ok",
+    "input": {
+      "goal": "npm run cdn:export",
+      "with": {}
+    },
+    "output": {
+      "goal": "npm run cdn:export",
+      "strategy": "workflow-backed (GitHub Action analog)",
+      "actions": [
+        "kernel.ps",
+        "kernel.write",
+        "kernel.resolve"
+      ]
+    },
+    "path": "/agents/harness/runs/arun_mt3tp017d7h1i3/steps/3",
+    "at": "2026-08-22T03:32:51.732Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
