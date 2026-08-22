@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: arena/01a01e33-github-actions
+          ref: main
           fetch-depth: 0
       - name: Attach L3 origin (actos/fs)
         run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
