@@ -1,0 +1,22 @@
+{
+  "name": "actos-convert",
+  "version": "0.1.0",
+  "description": "Convert a repo from Docker/local CPU to ACTOS: runner = CPU, result = object at pattern+id, ingest to hub.",
+  "hub": "https://camillanapoles.github.io/github-actions/",
+  "ingest": "/api/ingest",
+  "skills": [
+    "harness/skills/convert.md",
+    "harness/skills/loop.md"
+  ],
+  "bin": {
+    "actos-persist": "bin/actos-persist.mjs",
+    "actos-wrap": "bin/actos-wrap.sh",
+    "actos-ingest": "bin/actos-ingest.sh"
+  },
+  "workflows": ["workflows/actos-cpu.yml"],
+  "replace": {
+    "docker compose up": "npm ci && npm test && npm run build  # CPU = runner, not container",
+    "docker build": "npm run build on ubuntu-latest + persist object",
+    "docker run script": "npx tsx scripts/….ts then actos-persist"
+  }
+}

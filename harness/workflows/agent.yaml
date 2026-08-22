@@ -1,0 +1,48 @@
+# Workflow interno do harness agentic.
+# Não é o YAML do GitHub — é o programa que o agente executa
+# quando o Action (ou o kernel local) dispara um goal.
+# Cada step vira um objeto em /agents/{id}/runs/{runId}/steps/{n}
+
+name: agentic-harness
+on: goal
+
+jobs:
+  plan:
+    steps:
+      - id: inspect
+        name: Inspecionar espaço único
+        uses: kernel.ps
+      - id: memory
+        name: Ler memória (objetos permitidos)
+        uses: kernel.ls
+        with:
+          prefix: /objects
+      - id: plan
+        name: Planejar a partir do goal
+        uses: agent.plan
+
+  act:
+    needs: plan
+    steps:
+      - id: cache
+        name: Consultar cache de execuções
+        uses: kernel.cache.get
+      - id: tools
+        name: Agir com syscalls do kernel
+        uses: agent.act
+      - id: write
+        name: Escrever objetos (pattern + id)
+        uses: kernel.write
+
+  resolve:
+    needs: act
+    steps:
+      - id: objectify
+        name: Resolver execução → objeto
+        uses: kernel.resolve
+      - id: persist
+        name: Sair do runtime, persistir em path
+        uses: kernel.unmount
+      - id: cacheput
+        name: Cachear resultado
+        uses: kernel.cache.put

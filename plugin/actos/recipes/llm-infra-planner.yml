@@ -1,0 +1,70 @@
+# Receita: camillanapoles/llm-infra-planner
+#
+# Hoje: Docker/nginx só para SERVIR o SPA. Os jobs já são Node/tsx no runner.
+# Conversão ACTOS: CPU = runner (nunca docker compose / docker build).
+# Resultado = objecto /objects/camillanapoles--llm-infra-planner/{kind}/{runId}
+
+name: actos-llmcalc
+
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: ingest | prices | test | build
+        default: test
+        type: string
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    env:
+      NODE_NO_WARNINGS: "1"
+      ACTOS_REPO: camillanapoles/llm-infra-planner
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+
+      - name: CPU — test (never docker)
+        if: github.event.inputs.job == 'test' || github.event_name == 'schedule'
+        run: bash .actos-plugin/bin/actos-wrap.sh --kind test --id "$GITHUB_RUN_ID-test" -- npm test
+
+      - name: CPU — build (vite, not nginx image)
+        if: github.event.inputs.job == 'build'
+        run: bash .actos-plugin/bin/actos-wrap.sh --kind build --id "$GITHUB_RUN_ID-build" -- npm run build
+
+      - name: CPU — ingest models
+        if: github.event.inputs.job == 'ingest' || github.event_name == 'schedule'
+        run: bash .actos-plugin/bin/actos-wrap.sh --kind model-ingest --id "$GITHUB_RUN_ID-ingest" -- npx tsx scripts/ingest-models.ts
+
+      - name: CPU — refresh prices
+        if: github.event.inputs.job == 'prices'
+        run: bash .actos-plugin/bin/actos-wrap.sh --kind price-refresh --id "$GITHUB_RUN_ID-prices" -- bash -lc "npx tsx scripts/refresh-cloud-prices.ts && npx tsx scripts/refresh-hardware.ts"
+
+      - name: Validate data if present
+        run: npm run validate
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: actos-objects-${{ github.run_id }}
+          path: data/objects/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Ingest ACTOS hub
+        env:
+          ACTOS_INGEST_URL: ${{ secrets.ACTOS_INGEST_URL }}
+          ACTOS_INGEST_TOKEN: ${{ secrets.ACTOS_INGEST_TOKEN }}
+        run: bash .actos-plugin/bin/actos-ingest.sh

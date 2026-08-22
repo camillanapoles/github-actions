@@ -1,0 +1,50 @@
+# workflow_run → resolve. L2 = ticket, não o blob.
+
+name: runtime-persist
+
+on:
+  workflow_run:
+    workflows: ["agent-harness", "ci"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: GitHub run id a resolver
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: actos-fs
+  cancel-in-progress: false
+
+jobs:
+  persist:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: L2 ticket only
+        env:
+          SOURCE_RUN: ${{ github.event.workflow_run.id || github.event.inputs.run_id || github.run_id }}
+        run: npx tsx src/cli/gc.ts --ticket "$SOURCE_RUN"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: ticket-${{ github.run_id }}
+          path: data/tickets/
+          retention-days: 1
+      - name: Push L3 if origin allowed
+        if: github.event_name != 'pull_request'
+        run: npx tsx src/cli/fs-sync.ts --push

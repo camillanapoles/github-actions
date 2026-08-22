@@ -1,0 +1,96 @@
+# Agentic harness — CPU serverless.
+# L1 = actions/cache (edge, 7d, NÃO é origem).
+# L2 = artifact POINTER {sha, path, runId}, retention 1d.
+# L3 = git actos/fs (origin). PR never saves L1 as origin.
+
+name: agent-harness
+
+on:
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: Objetivo do agente
+        required: true
+        type: string
+      agent_id:
+        description: Agente (harness | cache-weaver)
+        required: false
+        default: harness
+        type: string
+  repository_dispatch:
+    types: [agent.run, actos.slice]
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: actos-cpu-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    env:
+      NODE_NO_WARNINGS: "1"
+      GOAL: ${{ github.event.inputs.goal || github.event.client_payload.goal || github.event.issue.title || 'Indexar runtime e persistir objetos' }}
+      AGENT_ID: ${{ github.event.inputs.agent_id || github.event.client_payload.agent_id || 'harness' }}
+      ACTOS_SLICE: ${{ github.event.action == 'actos.slice' && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Attach L3 origin (actos/fs)
+        run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Restore L1 edge (CAS, never origin)
+        uses: actions/cache@v5
+        with:
+          path: .actos-l1
+          key: actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-
+            actos-l1-
+
+      - name: Agent loop (CPU)
+        run: |
+          if [ "$ACTOS_SLICE" = "1" ]; then
+            npx tsx src/cli/agent.ts --slice --goal "$GOAL" --agent "$AGENT_ID"
+          else
+            npx tsx src/cli/agent.ts --goal "$GOAL" --agent "$AGENT_ID"
+          fi
+
+      - name: L2 ticket (pointer only)
+        run: npx tsx src/cli/gc.ts --ticket "$GITHUB_RUN_ID"
+
+      - name: Upload L2 pointer
+        uses: actions/upload-artifact@v5
+        with:
+          name: ticket-${{ github.run_id }}
+          path: data/tickets/
+          retention-days: 1
+          if-no-files-found: warn
+
+      - name: Save L1 only off pull_request (origin shield)
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/save@v5
+        with:
+          path: .actos-l1
+          key: actos-l1-${{ hashFiles('harness/workflows/agent.yaml') }}-${{ github.ref_name }}-${{ github.run_id }}
+
+      - name: Push L3 origin (actos/fs)
+        if: github.event_name != 'pull_request'
+        run: npx tsx src/cli/fs-sync.ts --push

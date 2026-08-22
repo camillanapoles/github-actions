@@ -1,0 +1,45 @@
+# Injeção de retorno (não é commit): informa a melhor prática
+# da sessão Arena em summary + comentário do PR + label arena-agent.
+# Merge / fechar só quando o utilizador disser claramente merge | fim | fechar.
+
+name: arena-session
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  inject-notice:
+    if: startsWith(github.head_ref, 'arena/') || startsWith(github.ref_name, 'arena/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Inject session practice (non-commit)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: npx --yes tsx src/cli/inject-session-notice.ts
+
+      - name: Block accidental merge language in summary
+        run: |
+          {
+            echo "## arena-agent — não merges por engano"
+            echo ""
+            echo "A sessão continua neste ramo \`arena/…\`."
+            echo "Merge / fechar **apenas** se o utilizador disser claramente: merge, fim, ou fechar."
+            echo "Tag: \`arena-agent\`"
+          } >> "$GITHUB_STEP_SUMMARY"
