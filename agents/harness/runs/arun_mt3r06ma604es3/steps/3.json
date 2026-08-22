@@ -1,0 +1,30 @@
+{
+  "id": "arun_mt3r06ma604es3_s3",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/3",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 3,
+    "name": "plan/Planejar a partir do goal",
+    "uses": "agent.plan",
+    "status": "ok",
+    "input": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "with": {}
+    },
+    "output": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "strategy": "workflow-backed (GitHub Action analog)",
+      "actions": [
+        "kernel.ps",
+        "kernel.write",
+        "kernel.resolve"
+      ]
+    },
+    "path": "/agents/harness/runs/arun_mt3r06ma604es3/steps/3",
+    "at": "2026-08-22T02:17:34.633Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
