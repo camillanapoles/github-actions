@@ -1,7 +1,7 @@
 {
   "runtime": {
     "processes": 0,
-    "updatedAt": "2026-08-22T23:38:19.343Z"
+    "updatedAt": "2026-08-22T23:38:20.766Z"
   },
   "executions": {
     "byStatus": {
@@ -34,7 +34,7 @@
   "rules": 6,
   "queue": 0,
   "gitfs": {
-    "head": "20f834a05f62f052958f22b53ced4c9d141df8c1",
+    "head": "d348eaa96a5003568124b983d3a13bdfd9f86cc6",
     "files": 89,
     "runtimeRefs": [],
     "workTree": "/home/runner/work/github-actions/github-actions/.actos-fs",
@@ -133,9 +133,7 @@
     "ttlMs": 604800000
   },
   "extra": {
-    "evicted": 0,
-    "promoted": 56,
-    "errors": []
+    "reason": "fs-sync --push"
   },
-  "at": "2026-08-22T23:38:19.729Z"
+  "at": "2026-08-22T23:38:21.159Z"
 }
