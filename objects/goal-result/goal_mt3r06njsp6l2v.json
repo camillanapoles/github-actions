@@ -1,0 +1,34 @@
+{
+  "id": "goal_mt3r06njsp6l2v",
+  "kind": "goal-result",
+  "path": "/objects/goal-result/goal_mt3r06njsp6l2v",
+  "pattern": "/objects/{kind}/{id}",
+  "payload": {
+    "goal": "node examples/06-docker-to-actos/run.mjs",
+    "plan": {
+      "goal": "node examples/06-docker-to-actos/run.mjs",
+      "strategy": "workflow-backed (GitHub Action analog)",
+      "actions": [
+        "kernel.ps",
+        "kernel.write",
+        "kernel.resolve"
+      ]
+    },
+    "act": {
+      "summary": "Goal \"node examples/06-docker-to-actos/run.mjs\" observado no kernel.",
+      "cachedExecutions": 11,
+      "runtimeProcesses": 1,
+      "objectIndex": {
+        "rule-doc": 1,
+        "goal-result": 3,
+        "execution": 15,
+        "manifest": 1
+      }
+    }
+  },
+  "metadata": {
+    "agent": "harness",
+    "runId": "arun_mt3r06ma604es3",
+    "rule": "allow-objects"
+  }
+}
