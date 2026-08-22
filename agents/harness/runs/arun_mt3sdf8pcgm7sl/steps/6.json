@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3sdf8pcgm7sl_s6",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3sdf8pcgm7sl/steps/6",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 6,
+    "name": "act/Escrever objetos (pattern + id)",
+    "uses": "kernel.write",
+    "status": "ok",
+    "input": {
+      "goal": "npm run cdn:export",
+      "with": {}
+    },
+    "output": {
+      "path": "/objects/goal-result/goal_mt3sdf9z9ac9tx",
+      "id": "goal_mt3sdf9z9ac9tx"
+    },
+    "path": "/agents/harness/runs/arun_mt3sdf8pcgm7sl/steps/6",
+    "at": "2026-08-22T02:55:52.011Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
