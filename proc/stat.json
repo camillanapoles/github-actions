@@ -1,37 +1,25 @@
 {
   "runtime": {
     "processes": 0,
-    "updatedAt": "2026-08-22T02:55:55.879Z"
+    "updatedAt": "2026-08-22T03:09:52.878Z"
   },
   "executions": {
     "byStatus": {
-      "cached": 12,
+      "cached": 11,
       "failed": 1
     },
     "cacheHits": 8,
-    "total": 13
+    "total": 12
   },
-  "objects": 90,
+  "objects": 26,
   "kinds": [
     {
-      "kind": "agent-step",
-      "count": 45
-    },
-    {
       "kind": "execution",
-      "count": 17
+      "count": 12
     },
     {
       "kind": "cache",
-      "count": 16
-    },
-    {
-      "kind": "agent-run",
-      "count": 5
-    },
-    {
-      "kind": "goal-result",
-      "count": 5
+      "count": 12
     },
     {
       "kind": "rule-doc",
@@ -46,12 +34,12 @@
   "rules": 6,
   "queue": 0,
   "gitfs": {
-    "head": "9297da8c57a839e17475b08129cb8883eac805bc",
+    "head": "a062f71219c2e41ecafdb7ba5b1178a17d4821ed",
     "files": 65,
     "runtimeRefs": [],
     "workTree": "/home/runner/work/github-actions/github-actions/.actos-fs",
     "attached": true,
-    "remoteHead": "61f507b1da3819db7911d5a85a8da0f1afd140f3",
+    "remoteHead": "556516d7a2336e666b9fbe07b8c760fbb4cb5af0",
     "casTags": [
       "refs/tags/actos/obj/04b3c5e18726dd85ea305c7a38fc29b985b324d7414ddb74f6489b1f793d4b62",
       "refs/tags/actos/obj/06dbbac51bdd12eb28b88e4e3f7466217564be805ec475c130248e2a2ddd99bd",
@@ -111,15 +99,17 @@
     "l1": {
       "entries": 42,
       "bytes": 52711,
-      "hits": 56
+      "hits": 98
     },
     "l2": {
-      "tickets": 2
+      "tickets": 0
     },
     "ttlMs": 604800000
   },
   "extra": {
-    "reason": "fs-sync --push"
+    "evicted": 0,
+    "promoted": 42,
+    "errors": []
   },
-  "at": "2026-08-22T02:55:56.178Z"
+  "at": "2026-08-22T03:09:53.111Z"
 }
