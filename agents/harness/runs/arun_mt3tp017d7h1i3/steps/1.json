@@ -1,0 +1,25 @@
+{
+  "id": "arun_mt3tp017d7h1i3_s1",
+  "kind": "agent-step",
+  "path": "/agents/harness/runs/arun_mt3tp017d7h1i3/steps/1",
+  "pattern": "/agents/{id}/runs/{runId}/steps/{n}",
+  "payload": {
+    "n": 1,
+    "name": "plan/Inspecionar espaço único",
+    "uses": "kernel.ps",
+    "status": "ok",
+    "input": {
+      "goal": "npm run cdn:export",
+      "with": {}
+    },
+    "output": {
+      "processes": 1,
+      "space": "unique-runtime"
+    },
+    "path": "/agents/harness/runs/arun_mt3tp017d7h1i3/steps/1",
+    "at": "2026-08-22T03:32:51.730Z"
+  },
+  "metadata": {
+    "rule": null
+  }
+}
