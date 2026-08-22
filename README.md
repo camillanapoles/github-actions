@@ -27,6 +27,9 @@ Tag de sessão: **`arena-agent`**. PR: https://github.com/camillanapoles/github-
 - Puter.js → camadas FS: [`docs/puter-insights.md`](docs/puter-insights.md)
 - **A tua acção (CPU, sem merge):** [`docs/ACAO-HUMANA.md`](docs/ACAO-HUMANA.md)
 - gh-aw / Node 20: [`docs/gh-aw.md`](docs/gh-aw.md)
+- **Achados Exemplo 6 (2026-08-22):** [`docs/ACHADOS-2026-08-22.md`](docs/ACHADOS-2026-08-22.md)
+- **Knowledge kernel-in-branch vs deployado:** [`docs/KNOWLEDGE-CDN-EXPORT-KERNEL.md`](docs/KNOWLEDGE-CDN-EXPORT-KERNEL.md)
+- **Patch pendente (workflows, requer permissão `workflows`):** [`docs/fixes/`](docs/fixes/)
 
 ---
 

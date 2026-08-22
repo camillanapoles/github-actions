@@ -1,0 +1,183 @@
+From 6a299cc4e9d7aa590c869a8a37d9d810d109ab5d Mon Sep 17 00:00:00 2001
+From: camillanapoles <40242992+camillanapoles@users.noreply.github.com>
+Date: Sat, 22 Aug 2026 03:35:46 +0000
+Subject: [PATCH] fix(cdn): gc usa kernel de main + assert do webpage no export
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+MOTIVO (prova por execução, docs/KNOWLEDGE-CDN-EXPORT-KERNEL.md):
+- gc.yml checkout ref: arena/01a01e33-github-actions aponta para branch de
+  kernel antiga (3b269bd): tem cdn-export.ts SEM merge de webpage/ e não tem
+  webpage/ — 'npm run cdn:export' aí gera .actos-cdn sem a calculadora.
+- Agora ref: main (kernel de produção, com o merge + webpage/).
+
+CLEAR:
+- cdn-pages.yml: step 'Assert calculadora presente' após cdn:export — o
+  cdn:export NÃO falha quando falta webpage/; a asserção torna a falha
+  silenciosa em run vermelho antes do deploy (test -f + grep <title>).
+- Comentários explicativos em ambos os workflows (branch usada, porquê,
+  fluxo do workflow_run, permissões).
+
+Co-authored-by: arena-agent <297053741+arena-agent@users.noreply.github.com>
+---
+ .github/workflows/cdn-pages.yml | 41 +++++++++++++++++++++++++++---
+ .github/workflows/gc.yml        | 44 ++++++++++++++++++++++++++++++++-
+ 2 files changed, 80 insertions(+), 5 deletions(-)
+
+diff --git a/.github/workflows/cdn-pages.yml b/.github/workflows/cdn-pages.yml
+index 4f7282a..f21cdc3 100644
+--- a/.github/workflows/cdn-pages.yml
++++ b/.github/workflows/cdn-pages.yml
+@@ -1,7 +1,22 @@
+-# Trampolim L4. Copia para .github/workflows/ na main (humano).
+-# Exporta .actos-cdn a partir do kernel no arena + L3 actos/fs.
+-# Pages: Settings → Pages → Source = GitHub Actions.
+-
++# =============================================================================
++# actos-cdn — exporta .actos-cdn e publica na GitHub Pages (Exemplo 6 incluído).
++#
++# ⚠️ PORQUE `checkout ref: main` É OBRIGATÓRIO (knowledge 2026-08-22):
++#   O `npm run cdn:export` (src/cli/cdn-export.ts) faz duas coisas:
++#     1) publishObjects()  → objectos ACTOS em .actos-cdn/{obj,objects,...}
++#     2) (SÓ NA MAIN) copia `webpage/` → .actos-cdn/llm-infra-planner/  ← SITE
++#   O passo 2 EXISTE APENAS no kernel da `main` (commit c992d09 / 93a885a).
++#   Na branch de kernel antiga (`arena/01a01e33-github-actions` @ 3b269bd) o
++#   cdn-export.ts NÃO tem esse merge e `webpage/` não existe:
++#     → `npm run cdn:export` gera .actos-cdn SEM llm-infra-planner/index.html
++#     → PÁGINA PUBLICA SEM ERRO, mas a calculadora NÃO RENDERIZA (só shell).
++#   Daí a asserção no fim: não confiar só no `success` do run.
++#
++#   FLUXO (porque faz sentido):
++#     actos-gc (cron) ──success──▶ actos-cdn (workflow_run) ──▶ deploy-pages
++#   O actos-gc SÓ é o gatilho + dono do disco L3. A página estática vem do
++#   checkout de `main` (webpage/), NÃO do actos/fs (que só tem objectos ACTOS).
++# =============================================================================
+ name: actos-cdn
+ 
+ on:
+@@ -21,6 +36,8 @@ concurrency:
+ 
+ jobs:
+   export:
++    # Só exportar se for dispatch manual OU o gatilho terminou com sucesso.
++    # (workflow_run com falha não publica uma página pela metade.)
+     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+     runs-on: ubuntu-latest
+     environment:
+@@ -29,10 +46,13 @@ jobs:
+     env:
+       NODE_NO_WARNINGS: "1"
+     steps:
++      # Kernel/PROD: checkout da `main` (não de arena/...) — ver bloco no topo.
+       - uses: actions/checkout@v6
+         with:
+           ref: main
+           fetch-depth: 0
++      # Anexa (fetch, só leitura) o object store L3 para o hydrate conseguir
++      # projectar os objectos ACTOS no kernel ── não é o que publica webpage/.
+       - name: Attach L3 origin (actos/fs)
+         run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
+       - uses: actions/setup-node@v6
+@@ -42,8 +62,21 @@ jobs:
+       - run: npm ci
+       - name: Hydrate L3 → export CDN
+         run: |
++          # 1) projecta L3 (actos/fs) para a view do kernel
+           npx tsx src/cli/fs-sync.ts --hydrate
++          # 2) publica objectos ACTOS + copia webpage/ (SE o checkout tiver)
+           npm run cdn:export
++      # ⛔ GUARD-RAIL (não confiar no success do run):
++      #    Se o kernel usado não tiver webpage/, o cdn:export NÃO falha e o
++      #    .actos-cdn fica sem a calculadora. Esta asserção transforma essa
++      #    falha silenciosa num run VERMELHO antes do deploy.
++      - name: Assert calculadora presente (webpage merge)
++        run: |
++          test -f .actos-cdn/llm-infra-planner/index.html \
++            || { echo "::error::webpage/ não foi exportado — o kernel do checkout não tem o merge (ref usado?). Sem a calculadora!"; exit 1; }
++          grep -q '<title>LLMcalc</title>' .actos-cdn/llm-infra-planner/index.html \
++            || { echo "::error::index.html da calculadora não é o LLMcalc"; exit 1; }
++          echo "OK: .actos-cdn/llm-infra-planner/index.html presente (LLMcalc)"
+       - uses: actions/upload-pages-artifact@v3
+         with:
+           path: .actos-cdn
+diff --git a/.github/workflows/gc.yml b/.github/workflows/gc.yml
+index f87e91e..482191d 100644
+--- a/.github/workflows/gc.yml
++++ b/.github/workflows/gc.yml
+@@ -1,3 +1,30 @@
++# =============================================================================
++# actos-gc — GC do L3 (disco append-only em refs/heads/actos/fs).
++#
++# ⚠️ REGRA CRÍTICA (descoberta em 2026-08-22, docs/KNOWLEDGE-CDN-EXPORT-KERNEL.md):
++#   O código que um workflow executa é o conteúdo da branch que o `checkout`
++#   usa — NÃO o que existe "na ideia" ou noutra branch. Se o checkout apontar
++#   para uma branch de kernel antiga/desatualizada, o GC grava objectos no
++#   actos/fs usando esse kernel velho (e afeta tudo o que depois ler o disco).
++#
++#   PORQUE `ref: main` (e não `arena/01a01e33-github-actions`):
++#   - `main` é a fonte de verdade dos workflows de produção + do kernel
++#     publicado (contém src/cli/cdn-export.ts COM o merge de webpage/ e o
++#     `webpage/llm-infra-planner/` — a GitHub Page do Exemplo 6).
++#   - A branch de kernel antiga (`arena/01a01e33-github-actions` @ 3b269bd)
++#     TEM `cdn-export.ts` MAS SEM o merge de webpage/ e NÃO TEM `webpage/`.
++#     Foi provado por execução: `npm run cdn:export` nessa branch gera um
++#     .actos-cdn SEM `llm-infra-planner/index.html` (a calculadora some).
++#   - A branch de kernel também não contém os workflows de produção
++#     (`.github/workflows/*` existem apenas em main), logo apontar para ela
++#     aqui só reintroduz o bug.
++#
++#   VALIDE sempre antes de mexer:
++#     git ls-tree -r <ref> --name-only | grep webpage/llm-infra-planner/index.html
++#
++# Concorrência: actos-fs — GC + export não podem correr em paralelo sobre o
++# mesmo disco (o `workflow_run` de actos-gc dispara actos-cdn DEPOIS do gc).
++# =============================================================================
+ name: actos-gc
+ 
+ on:
+@@ -22,11 +49,17 @@ jobs:
+     env:
+       NODE_NO_WARNINGS: "1"
+     steps:
++      # Kernel de produção: SEMPRE `main` (ver bloco no topo).
++      # NUNCA apontar para `arena/...` de kernel antigo — o workflow roda o
++      # que o checkout traz, e essa branch está desatualizada (sem webpage/).
+       - uses: actions/checkout@v6
+         with:
+-          ref: arena/01a01e33-github-actions
++          ref: main
+           fetch-depth: 0
+ 
++      # Anexa (fetch, só leitura) o estado actual do object store L3 ao repo.
++      # Não cria branch nova nem troca o branch da sessão; apenas materializa
++      # o ref `actos/fs` localmente para o kernel ler/escrever objectos.
+       - name: Attach L3 origin (actos/fs)
+         run: git fetch origin refs/heads/actos/fs:refs/heads/actos/fs
+ 
+@@ -37,13 +70,22 @@ jobs:
+ 
+       - run: npm ci
+ 
++      # Cache do nível L1 (DB SQLite local do kernel). Como os objectos são
++      # guardados em actos/fs (git), este cache é só aceleração — nunca é a
++      # fonte de verdade. Sem ele o GC reconstroi a partir do L3.
+       - uses: actions/cache@v5
+         with:
+           path: .actos-l1
+           key: actos-l1-${{ github.run_id }}
+           restore-keys: actos-l1-
+ 
++      # GC/sync: consolida objectos no L3 (actos/fs) e derruba refs órfãs.
+       - run: npx tsx src/cli/gc.ts --sync
+ 
++      # Push do L3: envia o refs/heads/actos/fs actualizado para origin.
++      # PERMISSÃO: needs `contents: write` — por isso o job tem esse scope.
++      # NOTA: este step é o ÚNICO que escreve no actos/fs. O cdn:export NÃO
++      # escreve nele (só lê), por isso a GitHub Page não depende de escrever
++      # em actos/fs — só de `main` ter o webpage/.
+       - name: Push L3 origin
+         run: npx tsx src/cli/fs-sync.ts --push
+-- 
+2.39.5
+
