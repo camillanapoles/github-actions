@@ -1,0 +1,34 @@
+{
+  "id": "goal_mt3oixz50w6hto",
+  "kind": "goal-result",
+  "path": "/objects/goal-result/goal_mt3oixz50w6hto",
+  "pattern": "/objects/{kind}/{id}",
+  "payload": {
+    "goal": "smoke cpu github",
+    "plan": {
+      "goal": "smoke cpu github",
+      "strategy": "workflow-backed (GitHub Action analog)",
+      "actions": [
+        "kernel.ps",
+        "kernel.write",
+        "kernel.resolve"
+      ]
+    },
+    "act": {
+      "summary": "Goal \"smoke cpu github\" observado no kernel.",
+      "cachedExecutions": 11,
+      "runtimeProcesses": 1,
+      "objectIndex": {
+        "rule-doc": 1,
+        "goal-result": 2,
+        "execution": 14,
+        "manifest": 1
+      }
+    }
+  },
+  "metadata": {
+    "agent": "harness",
+    "runId": "arun_mt3oixy0drk49t",
+    "rule": "allow-objects"
+  }
+}
