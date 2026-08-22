@@ -1,7 +1,7 @@
 {
   "runtime": {
     "processes": 0,
-    "updatedAt": "2026-08-22T02:17:39.212Z"
+    "updatedAt": "2026-08-22T02:55:55.879Z"
   },
   "executions": {
     "byStatus": {
@@ -11,27 +11,27 @@
     "cacheHits": 8,
     "total": 13
   },
-  "objects": 77,
+  "objects": 90,
   "kinds": [
     {
       "kind": "agent-step",
-      "count": 36
+      "count": 45
     },
     {
       "kind": "execution",
-      "count": 16
+      "count": 17
     },
     {
       "kind": "cache",
-      "count": 15
+      "count": 16
     },
     {
       "kind": "agent-run",
-      "count": 4
+      "count": 5
     },
     {
       "kind": "goal-result",
-      "count": 4
+      "count": 5
     },
     {
       "kind": "rule-doc",
@@ -46,16 +46,19 @@
   "rules": 6,
   "queue": 0,
   "gitfs": {
-    "head": "1e1c367e30d33bd23c1d23aee0dcd107bfeffcfd",
-    "files": 52,
+    "head": "9297da8c57a839e17475b08129cb8883eac805bc",
+    "files": 65,
     "runtimeRefs": [],
     "workTree": "/home/runner/work/github-actions/github-actions/.actos-fs",
     "attached": true,
-    "remoteHead": "67f9f8db865d0d5cbac259483baa9ba68691227c",
+    "remoteHead": "61f507b1da3819db7911d5a85a8da0f1afd140f3",
     "casTags": [
       "refs/tags/actos/obj/04b3c5e18726dd85ea305c7a38fc29b985b324d7414ddb74f6489b1f793d4b62",
       "refs/tags/actos/obj/06dbbac51bdd12eb28b88e4e3f7466217564be805ec475c130248e2a2ddd99bd",
+      "refs/tags/actos/obj/0bc710e0a3bb5a2dc71b7685a6bf866573ed10881ba915d968ee9bf13a69c923",
+      "refs/tags/actos/obj/10fc0abbe7396a5b49607514c2d955df871abe4b60abce1afbe99fb0c5a96c3f",
       "refs/tags/actos/obj/15b087314638b912114f0edffc27b11e386748ff9c030110214f1813e2f09e77",
+      "refs/tags/actos/obj/15c2d3686f83258ec6b74d8113bc864cf0717375815f27eacbd893ccb035a722",
       "refs/tags/actos/obj/1840924b05ece67964b1d4a52c7796899e5b562a5db9bf28d1239d0b77b2bf38",
       "refs/tags/actos/obj/19d520b2419f06febee152588f7f66750cf4d3680005833208d7ca701bdf97b5",
       "refs/tags/actos/obj/1bef0f3df1660664ad1816bebe1adc571113dcec663ce3e6ac392ec24d110e5c",
@@ -65,12 +68,17 @@
       "refs/tags/actos/obj/37011ee1d2eff71987c83a67079b1f9b73c051152b0c456d16102245546e45a1",
       "refs/tags/actos/obj/38baafc8ebcf5bbe9dc6d0a0f147bd225e392d10600643d9ea90c7451a950a01",
       "refs/tags/actos/obj/3cd0a05838afae69cac33895cafb1b10ebd42908e6afb2abfc814a3ef95e5356",
+      "refs/tags/actos/obj/3f6becf9118d2ef7cd0d5f5eee2b32cd5659d1124664496588678ce009e02ce3",
       "refs/tags/actos/obj/4367d538f32434d2d1c62e839e7ace5c522510b7c78b0e59d4e6eace4b3c0409",
+      "refs/tags/actos/obj/4dde730670b6258ba935052ade299e5b3c81a1b5b25db6ad23249b14c9eb98db",
+      "refs/tags/actos/obj/5b002ff2d4dbff2c71989881cdba385d53fdc099e0a6f568ecb38505d7d0ca04",
       "refs/tags/actos/obj/6097f65050d6e2c8fcf1551deff06fa660b36d6892d2bffcb88223193a985abb",
       "refs/tags/actos/obj/618c484c2c2a527d6319396b306ba19c4ba4d3f083589db527ae846efa71d0db",
       "refs/tags/actos/obj/625cf6aa549bdad7e86b2ca8165a1643e462e48e30efb50c6212681d22ffd8de",
       "refs/tags/actos/obj/62831300e4dfb917fc912362acff61efe853764f52258102f9f093a3cb0bec44",
       "refs/tags/actos/obj/63dc5e637d89ce7f1b9bd33b7214b3493553c611ca0bd5faa3f9f31bdb8168b9",
+      "refs/tags/actos/obj/6f3a0e39552836de2a645c61994d4d5ef00318dec8682ba7b19be3b06bd7b82b",
+      "refs/tags/actos/obj/74f6bb295e45566757927e8326a96c8d2d6cebdc6043e8d7815bb4f56c7bbd63",
       "refs/tags/actos/obj/796ac329a6d5a05e5d6f01af5d7fc372b229df4c9d703c1020bba6ea757efba6",
       "refs/tags/actos/obj/7c4570ac69896222793c40d37cff126d2972ffdd516fe8ea2bc482fb1ac68d74",
       "refs/tags/actos/obj/83f9438605e86256ad1dcaadd42b3d98a4085e2782fbdf9ad9c4acec2457f06d",
@@ -86,8 +94,13 @@
       "refs/tags/actos/obj/a3d861c0e2d0416355607ef9c06acab8d869f32dbab116a746d5c0e1e48d8fab",
       "refs/tags/actos/obj/af37e0311f8bf85a5e03e6a84a39b44055c2fb5ccb690bed636c57ae947121ae",
       "refs/tags/actos/obj/b441de3dab3e8582cd6ef5692bd0db0e2908990068f6c43306a14738373ddfc6",
+      "refs/tags/actos/obj/bf4c9e2046308740c3aa4f710a5a5b68ee899894aea7b9ba922b15720bb9b361",
+      "refs/tags/actos/obj/c16d407ce8d2693dc5334902461d90d7878369d30cf1867341cb40b7801c93bb",
+      "refs/tags/actos/obj/c3b120fa255978c035f9fb4129b429b30cd1b1345c9e51252712f177e295bd8c",
       "refs/tags/actos/obj/c5e6bf495edb217258379d16be05b06a524727b038074bf5b44defac11371366",
+      "refs/tags/actos/obj/ccc8d1d47d72bf243780740d1393069b30d0fba0512e1a40ec3714ffd5aa313e",
       "refs/tags/actos/obj/dad0ad0e11aa73025ae145ce35f766b722f9ec7276450debc782cd67656a0244",
+      "refs/tags/actos/obj/dca4e975fde2e9e129b1e4483a971cdf020d7a1fe94d1d276d0c11c6170f18d1",
       "refs/tags/actos/obj/deb545eac3990686e5e49c15168b61396a678da7cbaed7bf201005be3eab4f23",
       "refs/tags/actos/obj/eca35ff4ebb1a6ee2d902523777699136dd4102bf71cbf6e69fe0c4da10d30c1",
       "refs/tags/actos/obj/ee93680dfe7080b7d1981f760af342b8cd9f1f015f939439edba15a8ae7d63a8",
@@ -96,9 +109,9 @@
   },
   "cdn": {
     "l1": {
-      "entries": 28,
-      "bytes": 35234,
-      "hits": 42
+      "entries": 42,
+      "bytes": 52711,
+      "hits": 56
     },
     "l2": {
       "tickets": 2
@@ -108,5 +121,5 @@
   "extra": {
     "reason": "fs-sync --push"
   },
-  "at": "2026-08-22T02:17:39.567Z"
+  "at": "2026-08-22T02:55:56.178Z"
 }
