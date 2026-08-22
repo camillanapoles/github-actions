@@ -42,17 +42,28 @@ const rules: RuleRecord[] = [
 ];
 
 test("sucesso: URL imutável obj/{sha}.json e estável por path", () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pub-"));
-  const out = publishObjects(
-    [obj({ path: "/objects/note/n1", kind: "note", payload: { hello: 1, token: "s3cret" } })],
-    rules,
-    dir,
-  );
-  assert.equal(out.length, 1);
-  assert.match(out[0].immutable, /^\.\/obj\/[a-f0-9]{64}\.json$/);
-  const published = JSON.parse(fs.readFileSync(path.join(dir, out[0].immutable.replace(/^\.\//, "")), "utf8"));
-  assert.equal(published.payload.token, "***");
-  assert.equal(published.payload.hello, 1);
+  const prevRepo = process.env.GITHUB_REPOSITORY;
+  const prevBase = process.env.ACTOS_CDN_BASE;
+  delete process.env.GITHUB_REPOSITORY;
+  process.env.ACTOS_CDN_BASE = "";
+  try {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pub-"));
+    const out = publishObjects(
+      [obj({ path: "/objects/note/n1", kind: "note", payload: { hello: 1, token: "s3cret" } })],
+      rules,
+      dir,
+    );
+    assert.equal(out.length, 1);
+    assert.match(out[0].immutable, /^\.\/obj\/[a-f0-9]{64}\.json$/);
+    const published = JSON.parse(fs.readFileSync(path.join(dir, out[0].immutable.replace(/^\.\//, "")), "utf8"));
+    assert.equal(published.payload.token, "***");
+    assert.equal(published.payload.hello, 1);
+  } finally {
+    if (prevRepo == null) delete process.env.GITHUB_REPOSITORY;
+    else process.env.GITHUB_REPOSITORY = prevRepo;
+    if (prevBase == null) delete process.env.ACTOS_CDN_BASE;
+    else process.env.ACTOS_CDN_BASE = prevBase;
+  }
 });
 
 test("validação: deny e /runtime /agents não saem para o público", () => {
