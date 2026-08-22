@@ -1,7 +1,7 @@
 {
   "runtime": {
     "processes": 0,
-    "updatedAt": "2026-08-22T03:15:59.094Z"
+    "updatedAt": "2026-08-22T03:32:56.457Z"
   },
   "executions": {
     "byStatus": {
@@ -11,15 +11,15 @@
     "cacheHits": 8,
     "total": 13
   },
-  "objects": 102,
+  "objects": 114,
   "kinds": [
     {
       "kind": "agent-step",
-      "count": 54
+      "count": 63
     },
     {
       "kind": "execution",
-      "count": 18
+      "count": 19
     },
     {
       "kind": "cache",
@@ -27,11 +27,11 @@
     },
     {
       "kind": "agent-run",
-      "count": 6
+      "count": 7
     },
     {
       "kind": "goal-result",
-      "count": 6
+      "count": 7
     },
     {
       "kind": "rule-doc",
@@ -46,12 +46,12 @@
   "rules": 6,
   "queue": 0,
   "gitfs": {
-    "head": "c6609eb1d8e4e23d0608e184550157344faea3f1",
-    "files": 77,
+    "head": "6df30821f184e8c837786beaf087aa6297030369",
+    "files": 89,
     "runtimeRefs": [],
     "workTree": "/home/runner/work/github-actions/github-actions/.actos-fs",
     "attached": true,
-    "remoteHead": "9d995c83e9b56b20cd8b8fb23d44e69e315df26a",
+    "remoteHead": "eee71f2f99d898e23b5a1802e720c718508a33a9",
     "casTags": [
       "refs/tags/actos/obj/04b3c5e18726dd85ea305c7a38fc29b985b324d7414ddb74f6489b1f793d4b62",
       "refs/tags/actos/obj/06dbbac51bdd12eb28b88e4e3f7466217564be805ec475c130248e2a2ddd99bd",
@@ -69,10 +69,14 @@
       "refs/tags/actos/obj/282a40bd8ff266675a888c4b9e4e11deac931a95af0c71183b208939d90323b5",
       "refs/tags/actos/obj/37011ee1d2eff71987c83a67079b1f9b73c051152b0c456d16102245546e45a1",
       "refs/tags/actos/obj/38baafc8ebcf5bbe9dc6d0a0f147bd225e392d10600643d9ea90c7451a950a01",
+      "refs/tags/actos/obj/3aaca4230cc1dc7a9f2ecae72873532194c233845149ce9183828d77ee982372",
       "refs/tags/actos/obj/3cd0a05838afae69cac33895cafb1b10ebd42908e6afb2abfc814a3ef95e5356",
       "refs/tags/actos/obj/3f6becf9118d2ef7cd0d5f5eee2b32cd5659d1124664496588678ce009e02ce3",
+      "refs/tags/actos/obj/400ef9355d56485a5ee7423d797344e9bf8c22f6d79f24bf018dae3af5a27d02",
       "refs/tags/actos/obj/4367d538f32434d2d1c62e839e7ace5c522510b7c78b0e59d4e6eace4b3c0409",
       "refs/tags/actos/obj/44af197dbe061c4003be2a6d0f67b67963e89e4aa789b18ed4aa5fbb2c4c750a",
+      "refs/tags/actos/obj/476b34e6bf4e0bdd83e6f47601c32ad40344547521f5ccbef96c1122228c5c06",
+      "refs/tags/actos/obj/499d5e7fed4a4d42519b5f9215a1786d50647b4e5acfff5adf57e0f6f3e32ca4",
       "refs/tags/actos/obj/4dde730670b6258ba935052ade299e5b3c81a1b5b25db6ad23249b14c9eb98db",
       "refs/tags/actos/obj/5b002ff2d4dbff2c71989881cdba385d53fdc099e0a6f568ecb38505d7d0ca04",
       "refs/tags/actos/obj/6097f65050d6e2c8fcf1551deff06fa660b36d6892d2bffcb88223193a985abb",
@@ -88,10 +92,12 @@
       "refs/tags/actos/obj/77ca7b3cef69fca3bafb35ed6caa78f2630fe2f007bf0eaf6dccde2924c8b0f0",
       "refs/tags/actos/obj/796ac329a6d5a05e5d6f01af5d7fc372b229df4c9d703c1020bba6ea757efba6",
       "refs/tags/actos/obj/7c4570ac69896222793c40d37cff126d2972ffdd516fe8ea2bc482fb1ac68d74",
+      "refs/tags/actos/obj/7e7401ba81ff602b02e6f6ebbb594c9231ddbf52f308845101f7f1777a64b4dc",
       "refs/tags/actos/obj/7fb3a71263b334097579748e7ae5363fa3bbe7ba1c7dd8701223a2ada07fafa8",
       "refs/tags/actos/obj/83f9438605e86256ad1dcaadd42b3d98a4085e2782fbdf9ad9c4acec2457f06d",
       "refs/tags/actos/obj/8401a1e9bf6b1479f3a218f1e97a46b717e88a6dd8132ab8d1bf6df427f4e6d8",
       "refs/tags/actos/obj/86c362faf429f5e2b1f1003f6704351b917c17ce8f5b498d11d699094733063c",
+      "refs/tags/actos/obj/8d25599926d26a4a3bda524b9609171bb86fd18b35a1620929cad8306006658e",
       "refs/tags/actos/obj/8e501b2ebc341156beb62754bb90acbdece24b1d926e9acdca35314b6541cb61",
       "refs/tags/actos/obj/9220f925990967f228b9a4244598e380741db166234406cccd7863235dc32247",
       "refs/tags/actos/obj/94157e69a3bd430f08fa169abc792473f9ce43ed6e6be804614d5a1a66c62527",
@@ -101,18 +107,25 @@
       "refs/tags/actos/obj/a1f738421ca498de7fa92ee511eb67770f990fa6dec6043038bcca3e7b2cf07a",
       "refs/tags/actos/obj/a22d131d95bf10732aca263d3c0d9150c72f65e420c73595d9f438ff25ab9f8c",
       "refs/tags/actos/obj/a3d861c0e2d0416355607ef9c06acab8d869f32dbab116a746d5c0e1e48d8fab",
+      "refs/tags/actos/obj/aaabf93f1623532c94ff2020ca4e150279dd1442b9ddf74fe0d63f73a9957603",
       "refs/tags/actos/obj/af37e0311f8bf85a5e03e6a84a39b44055c2fb5ccb690bed636c57ae947121ae",
+      "refs/tags/actos/obj/b0bc45dd92babdf9da389f9bfe399b3a1cabf57f8635f1b3e06a178ca1743480",
       "refs/tags/actos/obj/b23c6daf14f8031491b85b4a216d7b7716df40722bdaa4b6188777b57cf8f396",
       "refs/tags/actos/obj/b441de3dab3e8582cd6ef5692bd0db0e2908990068f6c43306a14738373ddfc6",
       "refs/tags/actos/obj/b85fbbceace5d83421397529299f8e46aa579f60aba254f849b97d833cf3e572",
       "refs/tags/actos/obj/bf4c9e2046308740c3aa4f710a5a5b68ee899894aea7b9ba922b15720bb9b361",
+      "refs/tags/actos/obj/c04a3e3f70078a08a9ab2991494fc8e94b56b3a2533ba05e1230cf022e581193",
       "refs/tags/actos/obj/c16d407ce8d2693dc5334902461d90d7878369d30cf1867341cb40b7801c93bb",
       "refs/tags/actos/obj/c3b120fa255978c035f9fb4129b429b30cd1b1345c9e51252712f177e295bd8c",
       "refs/tags/actos/obj/c5e6bf495edb217258379d16be05b06a524727b038074bf5b44defac11371366",
+      "refs/tags/actos/obj/c8174be62859d9afe7c1a75f8cf7715ba6e14e8d7c03c54e77cf3c53d0a0dcf2",
       "refs/tags/actos/obj/ccc8d1d47d72bf243780740d1393069b30d0fba0512e1a40ec3714ffd5aa313e",
+      "refs/tags/actos/obj/ccf6e6c09529be044ad134687178803db06155e3492a21f34835a4de607dbfdd",
+      "refs/tags/actos/obj/d40c36aa92d04b5009ecd0e19bdc238a0ef6b1cb0531c6ddecd3239c14c22c13",
       "refs/tags/actos/obj/dad0ad0e11aa73025ae145ce35f766b722f9ec7276450debc782cd67656a0244",
       "refs/tags/actos/obj/dca4e975fde2e9e129b1e4483a971cdf020d7a1fe94d1d276d0c11c6170f18d1",
       "refs/tags/actos/obj/deb545eac3990686e5e49c15168b61396a678da7cbaed7bf201005be3eab4f23",
+      "refs/tags/actos/obj/ec2c5c261a21cd4469e784b74e507fb8a8cc3bf034f13917c3837962d0ef4268",
       "refs/tags/actos/obj/eca35ff4ebb1a6ee2d902523777699136dd4102bf71cbf6e69fe0c4da10d30c1",
       "refs/tags/actos/obj/ee93680dfe7080b7d1981f760af342b8cd9f1f015f939439edba15a8ae7d63a8",
       "refs/tags/actos/obj/eea4aa1784adf84b06ca3499408fb3f8c06d4a059f7d9fc9a80816d6809b341e",
@@ -134,5 +147,5 @@
   "extra": {
     "reason": "fs-sync --push"
   },
-  "at": "2026-08-22T03:15:59.448Z"
+  "at": "2026-08-22T03:32:56.786Z"
 }
