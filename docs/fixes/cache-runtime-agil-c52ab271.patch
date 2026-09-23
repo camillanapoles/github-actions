@@ -36,7 +36,7 @@ index f87e91e..8d55460 100644
 +          now=$(date +%s)
 +          gh cache list --key actos-l1- --limit 100 --json id,createdAt \
 +            | jq -r --argjson now "$now" \
-+                '.[] | select(($now - (.createdAt | fromdateiso8601)) > 604800) | .id' \
++                '.[] | select(($now - (.createdAt | sub("\\.[0-9]+Z$";"Z") | fromdateiso8601)) > 604800) | .id' \
 +            | xargs -r -n1 gh cache delete
 +
        - name: Push L3 origin

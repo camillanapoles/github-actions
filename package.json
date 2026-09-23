@@ -18,7 +18,7 @@
     "gc": "npx tsx src/cli/gc.ts --promote",
     "cdn:export": "npx tsx src/cli/cdn-export.ts",
     "test": "node --import tsx --test src/domain/*.test.ts src/invariants.test.ts examples/examples.test.mjs",
-    "postinstall": "node -e \"if(process.platform==='android'){const v=require('esbuild/package.json').version;require('child_process').execSync('npm i --no-save @esbuild/android-arm64@'+v,{stdio:'inherit'})}\"",
+    "postinstall": "node -e \"if(process.platform==='android'){const v=require('esbuild/package.json').version;require('child_process').execSync('npm i --no-save --no-package-lock --ignore-scripts @esbuild/android-arm64@'+v,{stdio:'inherit'})}\"",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts",
     "loop": "bash scripts/loop-action.sh",
     "plugin:install": "bash plugin/actos/install.sh"
