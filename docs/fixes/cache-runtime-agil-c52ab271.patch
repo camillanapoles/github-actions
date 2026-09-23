@@ -1,0 +1,43 @@
+diff --git a/.github/workflows/agent-harness.yml b/.github/workflows/agent-harness.yml
+index 7b4b35e..ef9489e 100644
+--- a/.github/workflows/agent-harness.yml
++++ b/.github/workflows/agent-harness.yml
+@@ -56,6 +56,7 @@ jobs:
+       - run: npm ci
+ 
+       - name: Restore L1 edge
++        id: l1
+         uses: actions/cache@v5
+         with:
+           path: .actos-l1
+@@ -81,8 +82,8 @@ jobs:
+           retention-days: 1
+           if-no-files-found: warn
+ 
+-      - name: Save L1 (not on pull_request)
+-        if: github.event_name != 'pull_request'
++      - name: Save L1 (só em miss da chave primária; não em pull_request)
++        if: github.event_name != 'pull_request' && steps.l1.outputs.cache-hit != 'true'
+         uses: actions/cache/save@v5
+         with:
+           path: .actos-l1
+diff --git a/.github/workflows/gc.yml b/.github/workflows/gc.yml
+index f87e91e..8d55460 100644
+--- a/.github/workflows/gc.yml
++++ b/.github/workflows/gc.yml
+@@ -45,5 +45,15 @@ jobs:
+ 
+       - run: npx tsx src/cli/gc.ts --sync
+ 
++      - name: Coleta L1 (prune actos-l1-* com mais de 7d)
++        env:
++          GH_TOKEN: ${{ github.token }}
++        run: |
++          now=$(date +%s)
++          gh cache list --key actos-l1- --limit 100 --json id,createdAt \
++            | jq -r --argjson now "$now" \
++                '.[] | select(($now - (.createdAt | fromdateiso8601)) > 604800) | .id' \
++            | xargs -r -n1 gh cache delete
++
+       - name: Push L3 origin
+         run: npx tsx src/cli/fs-sync.ts --push

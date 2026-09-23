@@ -29,6 +29,25 @@ npm run cdn:export         # .actos-cdn
 
 CDN público: https://camillanapoles.github.io/github-actions/
 
+## Termux (Android local)
+
+O `package.json` traz guard `postinstall`: se `process.platform === 'android'`,
+instala `@esbuild/android-arm64` na versão do esbuild do lockfile. Sem isto, o
+`node_modules` fica com o binário `@esbuild/linux-arm64` (install feito fora do
+device ou copiado) e **toda a suite falha com `TransformError`** no import.
+
+```bash
+npm install                # postinstall resolve o binário android sozinho
+npm test                   # esperado: 38/38 pass
+```
+
+- Se usares `--ignore-scripts`, corre à mão:
+  `npm i --no-save @esbuild/android-arm64@$(node -p "require('esbuild/package.json').version")`
+- **Node local ≠ CI**: os runners usam Node 20; local pode ser ≥22. O `src/test/env.ts`
+  já força `ACTOS_FILEDB=1` para expor diferenças de `node:sqlite` entre versões.
+- Coleta de cache L1 (equivalente local ao passo do `gc.yml`):
+  `gh cache list --key actos-l1- --json id,createdAt` + `gh cache delete <id>`.
+
 ## Converter OUTRO repo (sem Docker como CPU)
 
 ```bash
