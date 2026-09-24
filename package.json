@@ -18,12 +18,14 @@
     "gc": "npx tsx src/cli/gc.ts --promote",
     "cdn:export": "npx tsx src/cli/cdn-export.ts",
     "test": "node --import tsx --test src/domain/*.test.ts src/invariants.test.ts examples/examples.test.mjs",
+    "postinstall": "node -e \"if(process.platform==='android'){const v=require('esbuild/package.json').version;require('child_process').execSync('npm i --no-save --no-package-lock --ignore-scripts @esbuild/android-arm64@'+v,{stdio:'inherit'})}\"",
     "session-notice": "npx tsx src/cli/inject-session-notice.ts",
     "loop": "bash scripts/loop-action.sh",
     "plugin:install": "bash plugin/actos/install.sh"
   },
   "dependencies": {
     "next": "^15.1.7",
+    "node-gyp": "^13.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "yaml": "^2.7.0",
@@ -38,5 +40,13 @@
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
+  },
+  "trustedDependencies": [
+    "@ladybugdb/core",
+    "gitnexus",
+    "tree-sitter"
+  ],
+  "peerDependencies": {
+    "@types/bun": "^1.4.2"
   }
 }
